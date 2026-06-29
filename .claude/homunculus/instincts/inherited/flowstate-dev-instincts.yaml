@@ -1,0 +1,391 @@
+# Instincts generated from https://github.com/Chouksey-Arnav/flowstate-dev
+# Generated: 2026-06-29T22:12:47.166Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: flowstate-dev-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Commit Length
+
+## Action
+
+Write moderate-length commit messages (~68 characters)
+
+## Evidence
+
+- Average commit message length: 68 chars
+- Based on 9 commits
+
+---
+id: flowstate-dev-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: flowstate-dev-import-alias
+trigger: "when importing modules"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Import Alias
+
+## Action
+
+Use path aliases (@/, ~/) instead of relative imports
+
+## Evidence
+
+- Import analysis shows alias pattern
+- Example: import { x } from '@/lib/x'
+
+---
+id: flowstate-dev-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Export Style
+
+## Action
+
+Prefer mixed exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: mixed
+
+---
+id: flowstate-dev-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: flowstate-dev-workflow-add-new-feature-page
+trigger: "when doing add new feature page"
+confidence: 0.55
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Workflow Add New Feature Page
+
+## Action
+
+Follow the add-new-feature-page workflow:
+1. Create or update the page file under app/(app)/[feature]/page.tsx
+2. Add multiple new components under components/[feature]/*
+3. Optionally add or update supporting files in lib/, hooks/, or store/
+4. Wire up state management and UI interactions
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~1x per month
+- Files: app/(app)/[feature]/page.tsx, components/[feature]/*.tsx, lib/[feature].ts
+
+---
+id: flowstate-dev-workflow-ui-polish-or-enhancement-pass
+trigger: "when doing ui polish or enhancement pass"
+confidence: 0.55
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Workflow Ui Polish Or Enhancement Pass
+
+## Action
+
+Follow the ui-polish-or-enhancement-pass workflow:
+1. Update shared layout files (e.g., app/(app)/layout.tsx) to add wrappers or providers
+2. Add or update animation/transition components under components/layout/
+3. Modify feature list components (e.g., components/tasks/list.tsx, components/habits/habit-list.tsx) to support new UI behaviors
+4. Add new navigation or responsive UI elements (e.g., mobile nav)
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~1x per month
+- Files: app/(app)/layout.tsx, components/layout/*.tsx, components/tasks/list.tsx
+
+---
+id: flowstate-dev-instinct-file-naming
+trigger: "When creating a new file (component, hook, store, etc.)"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Instinct File Naming
+
+## Action
+
+Name the file using camelCase (e.g., taskList.tsx, useFocus.ts)
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.files
+- Seen in components/tasks/taskList.tsx, hooks/useFocus.ts
+
+---
+id: flowstate-dev-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Instinct Function Naming
+
+## Action
+
+Name the function using camelCase (e.g., addTask, fetchStats)
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.functions
+- Seen in lib/tasks.ts, hooks/useHabits.ts
+
+---
+id: flowstate-dev-instinct-class-naming
+trigger: "When defining a new class"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Instinct Class Naming
+
+## Action
+
+Name the class using PascalCase (e.g., TaskStore, FocusTimer)
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.classes
+
+---
+id: flowstate-dev-instinct-constant-naming
+trigger: "When defining a constant"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Instinct Constant Naming
+
+## Action
+
+Name the constant using SCREAMING_SNAKE_CASE (e.g., MAX_TASKS, FOCUS_DURATION)
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.constants
+
+---
+id: flowstate-dev-instinct-import-alias
+trigger: "When importing modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Instinct Import Alias
+
+## Action
+
+Use import aliases instead of relative paths where possible
+
+## Evidence
+
+- Pattern in codeStyle.importStyle
+- Seen in imports in components and lib
+
+---
+id: flowstate-dev-instinct-export-mixed
+trigger: "When exporting modules or functions"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Instinct Export Mixed
+
+## Action
+
+Use a mix of default and named exports as appropriate
+
+## Evidence
+
+- Pattern in codeStyle.exportStyle
+
+---
+id: flowstate-dev-instinct-test-location
+trigger: "When adding or updating tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Instinct Test Location
+
+## Action
+
+Place tests in a separate test directory, not alongside source files
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation
+
+---
+id: flowstate-dev-instinct-test-feature-coverage
+trigger: "When implementing a new feature or domain"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Instinct Test Feature Coverage
+
+## Action
+
+Write tests that cover the main CRUD operations and UI flows for the new feature
+
+## Evidence
+
+- Pattern in add-new-feature-page workflow steps
+- Seen in commits like M2, M4
+
+---
+id: flowstate-dev-instinct-git-commit-prefix
+trigger: "When making a commit"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Instinct Git Commit Prefix
+
+## Action
+
+Prefix the commit message with an uppercase 'M' and a number (e.g., M1: ...), followed by a concise description
+
+## Evidence
+
+- Pattern in commits.prefixes
+- Seen in commits: 'M1: scaffold Next.js app...'
+
+---
+id: flowstate-dev-instinct-git-commit-length
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Instinct Git Commit Length
+
+## Action
+
+Keep the commit message concise, ideally under 70 characters
+
+## Evidence
+
+- Pattern in commits.averageLength
+
+---
+id: flowstate-dev-instinct-add-feature-page
+trigger: "When a new main feature or domain is being added to the app"
+confidence: 0.98
+domain: workflow
+source: repo-analysis
+source_repo: Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Instinct Add Feature Page
+
+## Action
+
+Create or update the page under app/(app)/[feature]/page.tsx, add related components, and supporting logic in lib, hooks, and store folders
+
+## Evidence
+
+- Workflow: add-new-feature-page
+- Seen in commits: M2, M3, M4, M5, M6, M7
+
+---
+id: flowstate-dev-instinct-ui-polish
+trigger: "When improving UI/UX or visual polish of existing features"
+confidence: 0.88
+domain: workflow
+source: repo-analysis
+source_repo: Chouksey-Arnav/flowstate-dev
+---
+
+# Flowstate Dev Instinct Ui Polish
+
+## Action
+
+Update shared layout files, enhance animation/transition components, and modify feature list components for better UI behaviors
+
+## Evidence
+
+- Workflow: ui-polish-or-enhancement-pass
+- Seen in commit: M8
+
