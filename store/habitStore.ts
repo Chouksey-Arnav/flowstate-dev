@@ -15,6 +15,7 @@ interface HabitState {
   toggleCompletion: (id: string, dateKey?: string) => void;
   reorderAll: (habits: Habit[]) => void;
   seedDefaultsIfEmpty: () => void;
+  resetCompletions: () => void;
   resetAll: () => void;
 }
 
@@ -68,6 +69,9 @@ export const useHabitStore = create<HabitState>()(
           set({ habits: createDefaultHabits() });
         }
       },
+
+      resetCompletions: () =>
+        set((state) => ({ habits: state.habits.map((h) => ({ ...h, completions: [] })) })),
 
       resetAll: () => set({ habits: [] }),
     }),
