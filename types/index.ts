@@ -72,7 +72,7 @@ export interface Settings {
   firstDayOfWeek: FirstDayOfWeek;
 }
 
-export type SortBy = "dueDate" | "priority" | "created" | "manual";
+export type SortBy = "smart" | "dueDate" | "priority" | "created" | "manual";
 
 export interface TaskFilters {
   category?: Category;

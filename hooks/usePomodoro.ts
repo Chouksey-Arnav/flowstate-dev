@@ -1,125 +1,37 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSettingsStore } from "@/store/settingsStore";
-import { useFocusStore } from "@/store/focusStore";
-import { playBeep } from "@/lib/audio";
+import { usePomodoroStore, type PomodoroPhase } from "@/store/pomodoroStore";
 
-export type PomodoroPhase = "work" | "break" | "longBreak";
-
-interface UsePomodoroOptions {
-  taskId?: string;
-}
+export type { PomodoroPhase };
 
 /**
- * Ticks off an absolute endTimestamp (Date.now()-based) rather than naively
- * decrementing a counter, so backgrounded tabs don't drift.
+ * Thin selector hook over the global pomodoro store. All instances across
+ * the app (dashboard mini widget, focus page, status pill) read the same
+ * timer, which keeps counting down via <PomodoroEngine/> regardless of
+ * which page is mounted — navigating away no longer resets or pauses it.
  */
-export function usePomodoro({ taskId }: UsePomodoroOptions = {}) {
+export function usePomodoro() {
   const pomodoroWork = useSettingsStore((s) => s.pomodoroWork);
   const pomodoroBreak = useSettingsStore((s) => s.pomodoroBreak);
   const pomodoroLongBreak = useSettingsStore((s) => s.pomodoroLongBreak);
-  const autoStartNext = useSettingsStore((s) => s.autoStartNext);
-  const soundEnabled = useSettingsStore((s) => s.soundEnabled);
-  const timerSoundType = useSettingsStore((s) => s.timerSoundType);
-  const logSession = useFocusStore((s) => s.logSession);
 
-  const durations = useMemo<Record<PomodoroPhase, number>>(
-    () => ({
-      work: pomodoroWork * 60_000,
-      break: pomodoroBreak * 60_000,
-      longBreak: pomodoroLongBreak * 60_000,
-    }),
-    [pomodoroWork, pomodoroBreak, pomodoroLongBreak]
-  );
+  const phase = usePomodoroStore((s) => s.phase);
+  const running = usePomodoroStore((s) => s.running);
+  const remainingMs = usePomodoroStore((s) => s.remainingMs);
+  const cyclesCompleted = usePomodoroStore((s) => s.cyclesCompleted);
+  const taskId = usePomodoroStore((s) => s.taskId);
+  const setTaskId = usePomodoroStore((s) => s.setTaskId);
+  const start = usePomodoroStore((s) => s.start);
+  const pause = usePomodoroStore((s) => s.pause);
+  const reset = usePomodoroStore((s) => s.reset);
+  const skip = usePomodoroStore((s) => s.skip);
 
-  const [phase, setPhase] = useState<PomodoroPhase>("work");
-  const [running, setRunning] = useState(false);
-  const [remainingMs, setRemainingMs] = useState(durations.work);
-  const [cyclesCompleted, setCyclesCompleted] = useState(0);
-  const endTimestampRef = useRef<number | null>(null);
-  const startedAtRef = useRef<string | null>(null);
-  const phaseRef = useRef(phase);
-  phaseRef.current = phase;
-
-  useEffect(() => {
-    if (!running) setRemainingMs(durations[phase]);
-  }, [durations, phase, running]);
-
-  const completePhase = useCallback(() => {
-    const finishedPhase = phaseRef.current;
-    if (finishedPhase === "work" && startedAtRef.current) {
-      logSession({
-        taskId,
-        durationMinutes: pomodoroWork,
-        type: "pomodoro",
-        startedAt: startedAtRef.current,
-        endedAt: new Date().toISOString(),
-      });
-    }
-    if (soundEnabled) playBeep(timerSoundType);
-
-    const nextCycles = finishedPhase === "work" ? cyclesCompleted + 1 : cyclesCompleted;
-    const nextPhase: PomodoroPhase =
-      finishedPhase === "work" ? (nextCycles % 4 === 0 ? "longBreak" : "break") : "work";
-
-    setCyclesCompleted(nextCycles);
-    setPhase(nextPhase);
-    setRemainingMs(durations[nextPhase]);
-    endTimestampRef.current = null;
-    startedAtRef.current = null;
-
-    if (autoStartNext) {
-      const now = Date.now();
-      endTimestampRef.current = now + durations[nextPhase];
-      if (nextPhase === "work") startedAtRef.current = new Date(now).toISOString();
-      setRunning(true);
-    } else {
-      setRunning(false);
-    }
-  }, [cyclesCompleted, durations, soundEnabled, timerSoundType, autoStartNext, logSession, pomodoroWork, taskId]);
-
-  useEffect(() => {
-    if (!running) return;
-    const interval = setInterval(() => {
-      if (endTimestampRef.current == null) return;
-      const remaining = endTimestampRef.current - Date.now();
-      if (remaining <= 0) {
-        setRemainingMs(0);
-        completePhase();
-      } else {
-        setRemainingMs(remaining);
-      }
-    }, 250);
-    return () => clearInterval(interval);
-  }, [running, completePhase]);
-
-  const start = useCallback(() => {
-    const now = Date.now();
-    endTimestampRef.current = now + remainingMs;
-    if (phase === "work") startedAtRef.current = new Date(now).toISOString();
-    setRunning(true);
-  }, [remainingMs, phase]);
-
-  const pause = useCallback(() => {
-    if (endTimestampRef.current != null) {
-      setRemainingMs(Math.max(0, endTimestampRef.current - Date.now()));
-    }
-    endTimestampRef.current = null;
-    setRunning(false);
-  }, []);
-
-  const reset = useCallback(() => {
-    setRunning(false);
-    endTimestampRef.current = null;
-    startedAtRef.current = null;
-    setRemainingMs(durations[phase]);
-  }, [phase, durations]);
-
-  const skip = useCallback(() => {
-    setRunning(false);
-    completePhase();
-  }, [completePhase]);
+  const durations: Record<PomodoroPhase, number> = {
+    work: pomodoroWork * 60_000,
+    break: pomodoroBreak * 60_000,
+    longBreak: pomodoroLongBreak * 60_000,
+  };
 
   return {
     phase,
@@ -127,6 +39,8 @@ export function usePomodoro({ taskId }: UsePomodoroOptions = {}) {
     remainingMs,
     totalMs: durations[phase],
     cyclesCompleted,
+    taskId,
+    setTaskId,
     start,
     pause,
     reset,

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Habit, HabitCategory } from "@/types";
 import { generateId } from "@/lib/id";
-import { getNextOrder, createDefaultHabits } from "@/lib/habits";
+import { getNextOrder } from "@/lib/habits";
 import { toDateKey } from "@/lib/dates";
 
 interface HabitState {
@@ -14,7 +14,6 @@ interface HabitState {
   deleteHabit: (id: string) => void;
   toggleCompletion: (id: string, dateKey?: string) => void;
   reorderAll: (habits: Habit[]) => void;
-  seedDefaultsIfEmpty: () => void;
   resetCompletions: () => void;
   resetAll: () => void;
 }
@@ -63,12 +62,6 @@ export const useHabitStore = create<HabitState>()(
         })),
 
       reorderAll: (habits) => set({ habits }),
-
-      seedDefaultsIfEmpty: () => {
-        if (get().habits.length === 0) {
-          set({ habits: createDefaultHabits() });
-        }
-      },
 
       resetCompletions: () =>
         set((state) => ({ habits: state.habits.map((h) => ({ ...h, completions: [] })) })),

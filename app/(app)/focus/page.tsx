@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { History } from "lucide-react";
 import { usePomodoro } from "@/hooks/usePomodoro";
 import { useAmbientSound } from "@/hooks/useAmbientSound";
@@ -18,7 +19,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import type { AmbientSound } from "@/types";
 
 export default function FocusPage() {
-  const [taskId, setTaskId] = useState<string | undefined>(undefined);
+  const searchParams = useSearchParams();
   const [focusModeOpen, setFocusModeOpen] = useState(false);
   const [ambientEnabled, setAmbientEnabled] = useState(false);
   const [ambientVolume, setAmbientVolume] = useState(0.3);
@@ -28,8 +29,14 @@ export default function FocusPage() {
   const sessions = useFocusStore((s) => s.sessions);
   const tasks = useTaskStore((s) => s.tasks);
 
-  const pomodoro = usePomodoro({ taskId });
+  const pomodoro = usePomodoro();
+  const { setTaskId } = pomodoro;
   useAmbientSound(ambientSound, ambientEnabled, ambientVolume);
+
+  useEffect(() => {
+    const queryTaskId = searchParams.get("taskId");
+    if (queryTaskId) setTaskId(queryTaskId);
+  }, [searchParams, setTaskId]);
 
   function handleSoundChange(sound: AmbientSound) {
     updateSettings({ ambientSound: sound });
@@ -63,7 +70,7 @@ export default function FocusPage() {
           <CardTitle>Pomodoro timer</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4">
-          <SessionTaskPicker value={taskId} onChange={setTaskId} />
+          <SessionTaskPicker value={pomodoro.taskId} onChange={setTaskId} />
           {widget}
         </CardContent>
       </Card>

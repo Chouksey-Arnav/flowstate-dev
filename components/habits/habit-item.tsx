@@ -48,7 +48,7 @@ export function HabitItem({
       onDragStart={dragHandlers?.onDragStart}
       onDragOver={dragHandlers?.onDragOver}
       onDrop={dragHandlers?.onDrop}
-      className="rounded-lg border border-border bg-card p-3"
+      className="rounded-xl border border-border/60 bg-card p-3.5 shadow-card transition-all hover:border-border hover:shadow-card-hover"
     >
       <div className="flex items-center gap-3">
         {draggable && <GripVertical className="h-4 w-4 shrink-0 cursor-grab text-muted-foreground" />}

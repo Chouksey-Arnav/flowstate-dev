@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { GripVertical, MoreVertical, Pencil, Archive, ArchiveRestore, Trash2, Clock, Zap, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { GripVertical, MoreVertical, Pencil, Archive, ArchiveRestore, Trash2, Clock, Zap, Check, Timer } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +18,7 @@ import { SubtaskList } from "./subtask-list";
 import { cn } from "@/lib/utils";
 import { formatDisplayDate } from "@/lib/dates";
 import { isOverdue } from "@/lib/overdue";
+import { usePomodoroStore } from "@/store/pomodoroStore";
 import type { Task } from "@/types";
 
 interface TaskItemProps {
@@ -53,6 +55,8 @@ export function TaskItem({
   dragHandlers,
 }: TaskItemProps) {
   const [expanded, setExpanded] = useState(false);
+  const router = useRouter();
+  const setPomodoroTaskId = usePomodoroStore((s) => s.setTaskId);
   const completed = task.status === "completed";
   const archived = task.status === "archived";
   const overdue = isOverdue(task);
@@ -65,6 +69,12 @@ export function TaskItem({
     LOW: "border-l-border",
   };
 
+  function startFocus(e: React.MouseEvent) {
+    e.stopPropagation();
+    setPomodoroTaskId(task.id);
+    router.push(`/focus?taskId=${task.id}`);
+  }
+
   return (
     <div
       draggable={draggable}
@@ -72,9 +82,10 @@ export function TaskItem({
       onDragOver={dragHandlers?.onDragOver}
       onDrop={dragHandlers?.onDrop}
       className={cn(
-        "rounded-lg border border-l-4 border-border bg-card p-3 shadow-sm transition-all hover:shadow-md",
+        "group rounded-xl border border-l-[3px] border-border/60 bg-card p-3.5 shadow-card transition-all hover:border-border hover:shadow-card-hover",
         PRIORITY_ACCENT[task.priority],
-        completed && "border-l-flow-green bg-flow-green/5 opacity-70 hover:shadow-sm"
+        overdue && !completed && "bg-flow-red/[0.03]",
+        completed && "border-l-flow-green bg-flow-green/5 opacity-60 hover:shadow-card"
       )}
     >
       <div className="flex items-start gap-3">
@@ -131,6 +142,14 @@ export function TaskItem({
               </span>
             )}
           </div>
+          {task.subtasks.length > 0 && (
+            <div className="mt-2 h-1 w-full max-w-[160px] overflow-hidden rounded-full bg-secondary">
+              <div
+                className="h-full rounded-full bg-flow-green transition-all duration-300"
+                style={{ width: `${(subtaskDone / task.subtasks.length) * 100}%` }}
+              />
+            </div>
+          )}
           {expanded && task.subtasks.length > 0 && (
             <div className="mt-3 border-t border-border pt-3">
               <SubtaskList subtasks={task.subtasks} onToggle={onToggleSubtask} />
@@ -138,6 +157,17 @@ export function TaskItem({
           )}
         </div>
 
+        {!completed && !archived && (
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Start a focus session for this task"
+            className="h-8 w-8 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary focus-visible:opacity-100"
+            onClick={startFocus}
+          >
+            <Timer className="h-4 w-4" />
+          </Button>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">

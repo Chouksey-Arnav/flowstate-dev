@@ -33,16 +33,18 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "sticky top-0 hidden h-screen flex-col border-r border-border bg-card transition-all duration-200 md:flex",
+        "sticky top-0 hidden h-screen flex-col border-r border-border/60 bg-card/60 backdrop-blur-xl transition-all duration-200 md:flex",
         collapsed ? "w-16" : "w-60"
       )}
     >
-      <div className={cn("flex items-center gap-2 px-4 py-5", collapsed && "justify-center px-0")}>
-        <div className="h-7 w-7 shrink-0 rounded-md bg-primary" />
-        {!collapsed && <span className="text-sm font-semibold text-foreground">FlowState</span>}
+      <div className={cn("flex items-center gap-2.5 px-4 py-5", collapsed && "justify-center px-0")}>
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-sm font-bold text-primary-foreground shadow-sm shadow-primary/40">
+          F
+        </div>
+        {!collapsed && <span className="text-sm font-semibold tracking-tight text-gradient">FlowState</span>}
       </div>
 
-      <nav className="flex-1 space-y-1 px-2">
+      <nav className="flex-1 space-y-1 px-2.5">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const active = pathname?.startsWith(item.href);
@@ -51,17 +53,25 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
                 active
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                  ? "bg-primary/12 text-primary"
+                  : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground",
                 collapsed && "justify-center px-0"
               )}
             >
+              {active && (
+                <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary" />
+              )}
               <Icon className="h-4 w-4 shrink-0" />
               {!collapsed && <span className="flex-1">{item.label}</span>}
               {!collapsed && item.href === "/tasks" && activeTaskCount > 0 && (
-                <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-xs text-primary">
+                <span
+                  className={cn(
+                    "rounded-full px-1.5 py-0.5 text-xs",
+                    active ? "bg-primary/20 text-primary" : "bg-secondary text-muted-foreground"
+                  )}
+                >
                   {activeTaskCount}
                 </span>
               )}
@@ -72,7 +82,7 @@ export function Sidebar() {
 
       <button
         onClick={() => setCollapsed((c) => !c)}
-        className="flex items-center justify-center gap-2 border-t border-border px-3 py-3 text-xs text-muted-foreground hover:text-foreground"
+        className="flex items-center justify-center gap-2 border-t border-border/60 px-3 py-3 text-xs text-muted-foreground transition-colors hover:text-foreground"
       >
         {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         {!collapsed && "Collapse"}
