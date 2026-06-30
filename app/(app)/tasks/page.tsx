@@ -12,11 +12,15 @@ import { BulkActionsBar } from "@/components/tasks/bulk-actions-bar";
 import { BrainDumpInput } from "@/components/tasks/brain-dump-input";
 import { ArchiveView } from "@/components/tasks/archive-view";
 import { UndoToast } from "@/components/tasks/undo-toast";
+import { MomentumBar } from "@/components/tasks/momentum-bar";
 import { useTaskStore } from "@/store/taskStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { getActiveTasks, filterTasks, sortTasks, reorderTasks } from "@/lib/tasks";
 import { fireTaskCompleteConfetti } from "@/lib/confetti";
 import { playCompletionChime } from "@/lib/audio";
+import { calculateTaskStreak } from "@/lib/streaks";
+import { toDateKey } from "@/lib/dates";
+import { getRandomCompletionLine } from "@/lib/quotes";
 import type { Task, TaskFilters, SortBy } from "@/types";
 
 export default function TasksPage() {
@@ -38,18 +42,25 @@ export default function TasksPage() {
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [view, setView] = useState<"active" | "archive">("active");
-  const [undo, setUndo] = useState<{ taskId: string } | null>(null);
+  const [undo, setUndo] = useState<{ taskId: string; message: string } | null>(null);
 
   const activeTasks = getActiveTasks(tasks);
   const filtered = filterTasks(activeTasks, filters);
   const sorted = sortTasks(filtered, sortBy);
   const draggable = sortBy === "manual" && !filters.category && !filters.priority;
 
+  const todayKey = toDateKey();
+  const completedToday = tasks.filter(
+    (t) => t.completedAt && toDateKey(new Date(t.completedAt)) === todayKey
+  ).length;
+  const totalToday = activeTasks.length + completedToday;
+  const streak = calculateTaskStreak(tasks).current;
+
   function handleComplete(id: string) {
     completeTask(id);
     if (confettiEnabled) fireTaskCompleteConfetti();
     if (soundEnabled) playCompletionChime();
-    setUndo({ taskId: id });
+    setUndo({ taskId: id, message: getRandomCompletionLine() });
   }
 
   function handleReorder(draggedId: string, targetId: string) {
@@ -109,6 +120,8 @@ export default function TasksPage() {
         <ArchiveView />
       ) : (
         <>
+          <MomentumBar completedToday={completedToday} totalToday={totalToday} streak={streak} />
+
           <BrainDumpInput />
 
           <div className="flex items-center justify-between gap-2">
@@ -127,8 +140,8 @@ export default function TasksPage() {
           {sorted.length === 0 ? (
             <EmptyState
               icon={ListTodo}
-              title="No tasks yet"
-              description="Add your first task above to get started."
+              title="Clean slate"
+              description="Add one task and take the first step — momentum starts with a single done."
             />
           ) : (
             <TaskList
@@ -156,7 +169,7 @@ export default function TasksPage() {
 
       {undo && (
         <UndoToast
-          message="Task completed"
+          message={undo.message}
           onUndo={() => uncompleteTask(undo.taskId)}
           onDismiss={() => setUndo(null)}
         />
