@@ -4,6 +4,7 @@ import { useTaskStore } from "@/store/taskStore";
 import { useHabitStore } from "@/store/habitStore";
 import { useFocusStore } from "@/store/focusStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { usePomodoroStore } from "@/store/pomodoroStore";
 import { SplashSkeleton } from "./splash-skeleton";
 
 export function HydrationGate({ children }: { children: React.ReactNode }) {
@@ -11,8 +12,9 @@ export function HydrationGate({ children }: { children: React.ReactNode }) {
   const habitsHydrated = useHabitStore((s) => s.hasHydrated);
   const focusHydrated = useFocusStore((s) => s.hasHydrated);
   const settingsHydrated = useSettingsStore((s) => s.hasHydrated);
+  const pomodoroHydrated = usePomodoroStore((s) => s.hasHydrated);
 
-  const ready = tasksHydrated && habitsHydrated && focusHydrated && settingsHydrated;
+  const ready = tasksHydrated && habitsHydrated && focusHydrated && settingsHydrated && pomodoroHydrated;
 
   if (!ready) return <SplashSkeleton />;
   return <>{children}</>;

@@ -10,6 +10,7 @@ import {
 import type { SortBy } from "@/types";
 
 const OPTIONS: { value: SortBy; label: string }[] = [
+  { value: "smart", label: "Recommended" },
   { value: "manual", label: "Manual order" },
   { value: "dueDate", label: "Due date" },
   { value: "priority", label: "Priority" },

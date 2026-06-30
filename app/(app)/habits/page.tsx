@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { addDays } from "date-fns";
 import { Plus, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,16 +19,11 @@ export default function HabitsPage() {
   const toggleCompletion = useHabitStore((s) => s.toggleCompletion);
   const deleteHabit = useHabitStore((s) => s.deleteHabit);
   const reorderAll = useHabitStore((s) => s.reorderAll);
-  const seedDefaultsIfEmpty = useHabitStore((s) => s.seedDefaultsIfEmpty);
 
   const firstDayOfWeek = useSettingsStore((s) => s.firstDayOfWeek);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined);
-
-  useEffect(() => {
-    seedDefaultsIfEmpty();
-  }, [seedDefaultsIfEmpty]);
 
   const weekStart = getWeekStart(firstDayOfWeek);
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -62,7 +57,7 @@ export default function HabitsPage() {
         <EmptyState
           icon={ListChecks}
           title="No habits yet"
-          description="Add your first habit above to start building streaks."
+          description="Habits are never added for you — create your first one and the streak starts tracking from there."
         />
       ) : (
         <HabitList

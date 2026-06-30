@@ -1,7 +1,6 @@
 import type { Habit } from "@/types";
 import { toDateKey } from "./dates";
 import { calculateStreakFromDateSet, type Streak } from "./streaks";
-import { generateId } from "./id";
 
 export function isCompletedOn(habit: Habit, dateKey: string): boolean {
   return habit.completions.includes(dateKey);
@@ -33,25 +32,4 @@ export function reorderHabits(habits: Habit[], draggedId: string, targetId: stri
   const [moved] = list.splice(fromIndex, 1);
   list.splice(toIndex, 0, moved);
   return list.map((h, i) => ({ ...h, order: i }));
-}
-
-export function createDefaultHabits(): Habit[] {
-  const now = new Date().toISOString();
-  const defaults: Array<Pick<Habit, "name" | "icon" | "category">> = [
-    { name: "Drink water", icon: "Droplets", category: "Health" },
-    { name: "Exercise", icon: "Dumbbell", category: "Health" },
-    { name: "Read", icon: "BookOpen", category: "Learning" },
-    { name: "Meditate", icon: "Brain", category: "Mental" },
-    { name: "Deep work block", icon: "Briefcase", category: "Business" },
-    { name: "Plan tomorrow", icon: "ListChecks", category: "Misc" },
-  ];
-  return defaults.map((d, i) => ({
-    id: generateId(),
-    name: d.name,
-    icon: d.icon,
-    category: d.category,
-    completions: [],
-    order: i,
-    createdAt: now,
-  }));
 }

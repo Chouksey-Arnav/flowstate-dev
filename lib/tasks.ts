@@ -1,6 +1,9 @@
+import { toDateKey } from "./dates";
+import { isOverdue } from "./overdue";
 import type { Task, TaskFilters, SortBy, Priority } from "@/types";
 
 const PRIORITY_ORDER: Record<Priority, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+const PRIORITY_SCORE: Record<Priority, number> = { HIGH: 300, MEDIUM: 150, LOW: 0 };
 
 export function filterTasks(tasks: Task[], filters: TaskFilters): Task[] {
   return tasks.filter((t) => {
@@ -9,6 +12,19 @@ export function filterTasks(tasks: Task[], filters: TaskFilters): Task[] {
     if (filters.status && t.status !== filters.status) return false;
     return true;
   });
+}
+
+/**
+ * Ranks "what should I actually do right now" — overdue work outranks
+ * everything, then priority, then due-today urgency, with a small nudge
+ * toward quick wins so the list doesn't always favor the scariest task.
+ */
+export function getFocusScore(task: Task, today: string = toDateKey()): number {
+  let score = PRIORITY_SCORE[task.priority];
+  if (isOverdue(task)) score += 1000;
+  else if (task.dueDate === today) score += 200;
+  if (task.estimatedMinutes && task.estimatedMinutes <= 15) score += 20;
+  return score;
 }
 
 export function sortTasks(tasks: Task[], sortBy: SortBy): Task[] {
@@ -25,10 +41,24 @@ export function sortTasks(tasks: Task[], sortBy: SortBy): Task[] {
       return list.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
     case "created":
       return list.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    case "smart": {
+      const today = toDateKey();
+      return list.sort((a, b) => {
+        const diff = getFocusScore(b, today) - getFocusScore(a, today);
+        return diff !== 0 ? diff : a.createdAt.localeCompare(b.createdAt);
+      });
+    }
     case "manual":
     default:
       return list.sort((a, b) => a.order - b.order);
   }
+}
+
+/** The single best task to start on right now, for the "Do this next" hero. */
+export function getFocusPick(tasks: Task[], excludeId?: string): Task | null {
+  const active = getActiveTasks(tasks).filter((t) => t.id !== excludeId);
+  if (active.length === 0) return null;
+  return sortTasks(active, "smart")[0];
 }
 
 export function getActiveTasks(tasks: Task[]): Task[] {
@@ -44,7 +74,7 @@ export function getArchivedTasks(tasks: Task[]): Task[] {
 }
 
 export function getTopTasks(tasks: Task[], count = 3): Task[] {
-  return sortTasks(getActiveTasks(tasks), "priority").slice(0, count);
+  return sortTasks(getActiveTasks(tasks), "smart").slice(0, count);
 }
 
 export function getNextOrder(tasks: Task[]): number {

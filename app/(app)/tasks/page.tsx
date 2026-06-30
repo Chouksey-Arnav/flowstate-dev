@@ -13,9 +13,10 @@ import { BrainDumpInput } from "@/components/tasks/brain-dump-input";
 import { ArchiveView } from "@/components/tasks/archive-view";
 import { UndoToast } from "@/components/tasks/undo-toast";
 import { MomentumBar } from "@/components/tasks/momentum-bar";
+import { FocusPickCard } from "@/components/tasks/focus-pick-card";
 import { useTaskStore } from "@/store/taskStore";
 import { useSettingsStore } from "@/store/settingsStore";
-import { getActiveTasks, filterTasks, sortTasks, reorderTasks } from "@/lib/tasks";
+import { getActiveTasks, filterTasks, sortTasks, reorderTasks, getFocusPick } from "@/lib/tasks";
 import { fireTaskCompleteConfetti } from "@/lib/confetti";
 import { playCompletionChime } from "@/lib/audio";
 import { calculateTaskStreak } from "@/lib/streaks";
@@ -37,17 +38,20 @@ export default function TasksPage() {
   const confettiEnabled = useSettingsStore((s) => s.confettiEnabled);
 
   const [filters, setFilters] = useState<TaskFilters>({});
-  const [sortBy, setSortBy] = useState<SortBy>("manual");
+  const [sortBy, setSortBy] = useState<SortBy>("smart");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [view, setView] = useState<"active" | "archive">("active");
   const [undo, setUndo] = useState<{ taskId: string; message: string } | null>(null);
+  const [skippedFocusId, setSkippedFocusId] = useState<string | undefined>(undefined);
 
   const activeTasks = getActiveTasks(tasks);
   const filtered = filterTasks(activeTasks, filters);
   const sorted = sortTasks(filtered, sortBy);
   const draggable = sortBy === "manual" && !filters.category && !filters.priority;
+
+  const focusPick = getFocusPick(tasks, skippedFocusId) ?? getFocusPick(tasks);
 
   const todayKey = toDateKey();
   const completedToday = tasks.filter(
@@ -121,6 +125,14 @@ export default function TasksPage() {
       ) : (
         <>
           <MomentumBar completedToday={completedToday} totalToday={totalToday} streak={streak} />
+
+          {focusPick && (
+            <FocusPickCard
+              task={focusPick}
+              canShowAnother={activeTasks.length > 1}
+              onAnother={() => setSkippedFocusId(focusPick.id)}
+            />
+          )}
 
           <BrainDumpInput />
 
