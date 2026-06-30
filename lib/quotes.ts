@@ -25,3 +25,20 @@ export function getHourlyQuote(date: Date = new Date()): string {
   const hourIndex = date.getHours() % QUOTES.length;
   return QUOTES[hourIndex];
 }
+
+export const COMPLETION_LINES: string[] = [
+  "Done. That's momentum, not luck.",
+  "One less thing in your head. Keep moving.",
+  "That's the work avoiding-you used to win.",
+  "Shipped. Future you says thanks.",
+  "Streak protected. Don't stop now.",
+  "Proof you can do hard things today.",
+  "Nailed it. Pick the next one.",
+  "That's how the list gets shorter — one real decision at a time.",
+  "Momentum unlocked. Ride it into the next task.",
+  "You showed up. That's the whole game.",
+];
+
+export function getRandomCompletionLine(): string {
+  return COMPLETION_LINES[Math.floor(Math.random() * COMPLETION_LINES.length)];
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { GripVertical, MoreVertical, Pencil, Archive, ArchiveRestore, Trash2, Clock } from "lucide-react";
+import { GripVertical, MoreVertical, Pencil, Archive, ArchiveRestore, Trash2, Clock, Zap, Check } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,6 +57,13 @@ export function TaskItem({
   const archived = task.status === "archived";
   const overdue = isOverdue(task);
   const subtaskDone = task.subtasks.filter((s) => s.completed).length;
+  const quickWin = !completed && !!task.estimatedMinutes && task.estimatedMinutes <= 15;
+
+  const PRIORITY_ACCENT: Record<string, string> = {
+    HIGH: "border-l-flow-red",
+    MEDIUM: "border-l-flow-yellow",
+    LOW: "border-l-border",
+  };
 
   return (
     <div
@@ -65,8 +72,9 @@ export function TaskItem({
       onDragOver={dragHandlers?.onDragOver}
       onDrop={dragHandlers?.onDrop}
       className={cn(
-        "rounded-lg border border-border bg-card p-3 transition-colors",
-        completed && "opacity-60"
+        "rounded-lg border border-l-4 border-border bg-card p-3 shadow-sm transition-all hover:shadow-md",
+        PRIORITY_ACCENT[task.priority],
+        completed && "border-l-flow-green bg-flow-green/5 opacity-70 hover:shadow-sm"
       )}
     >
       <div className="flex items-start gap-3">
@@ -81,11 +89,14 @@ export function TaskItem({
         <Checkbox
           checked={completed}
           onCheckedChange={() => (completed ? onUncomplete() : onComplete())}
-          className="mt-1"
+          className={cn(
+            "mt-1 transition-transform",
+            completed && "border-flow-green bg-flow-green text-primary-foreground"
+          )}
         />
 
         <div className="min-w-0 flex-1 cursor-pointer" onClick={() => setExpanded((e) => !e)}>
-          <p className={cn("text-sm font-medium text-foreground", completed && "line-through")}>
+          <p className={cn("text-sm font-medium text-foreground transition-colors", completed && "line-through decoration-flow-green/70 text-muted-foreground")}>
             {task.title}
           </p>
           {task.description && (
@@ -95,6 +106,16 @@ export function TaskItem({
             <CategoryBadge category={task.category} />
             <PriorityBadge priority={task.priority} />
             {overdue && <OverdueBadge />}
+            {quickWin && (
+              <span className="flex items-center gap-1 rounded-full border border-flow-blue/30 bg-flow-blue/10 px-2 py-0.5 text-xs font-medium text-flow-blue">
+                <Zap className="h-3 w-3" /> Quick win
+              </span>
+            )}
+            {completed && (
+              <span className="flex items-center gap-1 rounded-full border border-flow-green/30 bg-flow-green/10 px-2 py-0.5 text-xs font-medium text-flow-green">
+                <Check className="h-3 w-3" /> Done
+              </span>
+            )}
             {task.dueDate && (
               <span className="text-xs text-muted-foreground">{formatDisplayDate(task.dueDate)}</span>
             )}

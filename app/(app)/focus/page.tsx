@@ -10,6 +10,7 @@ import { useTaskStore } from "@/store/taskStore";
 import { PomodoroWidget } from "@/components/focus/pomodoro-widget";
 import { SessionTaskPicker } from "@/components/focus/session-task-picker";
 import { VideoGrid } from "@/components/focus/video-grid";
+import { MotivationVideos } from "@/components/focus/motivation-videos";
 import { FullFocusMode } from "@/components/focus/full-focus-mode";
 import { AmbientSoundControl } from "@/components/focus/ambient-sound-control";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -77,6 +78,8 @@ export default function FocusPage() {
       />
 
       <VideoGrid />
+
+      <MotivationVideos />
 
       <Card>
         <CardHeader>
