@@ -33,6 +33,7 @@ export default function TasksPage() {
   const deleteTask = useTaskStore((s) => s.deleteTask);
   const toggleSubtask = useTaskStore((s) => s.toggleSubtask);
   const reorderAll = useTaskStore((s) => s.reorderAll);
+  const skipTask = useTaskStore((s) => s.skipTask);
 
   const soundEnabled = useSettingsStore((s) => s.soundEnabled);
   const confettiEnabled = useSettingsStore((s) => s.confettiEnabled);
@@ -49,7 +50,7 @@ export default function TasksPage() {
   const activeTasks = getActiveTasks(tasks);
   const filtered = filterTasks(activeTasks, filters);
   const sorted = sortTasks(filtered, sortBy);
-  const draggable = sortBy === "manual" && !filters.category && !filters.priority;
+  const draggable = sortBy === "manual" && !filters.category && !filters.priority && !filters.difficulty;
 
   const focusPick = getFocusPick(tasks, skippedFocusId) ?? getFocusPick(tasks);
 
@@ -130,7 +131,10 @@ export default function TasksPage() {
             <FocusPickCard
               task={focusPick}
               canShowAnother={activeTasks.length > 1}
-              onAnother={() => setSkippedFocusId(focusPick.id)}
+              onAnother={() => {
+                skipTask(focusPick.id);
+                setSkippedFocusId(focusPick.id);
+              }}
             />
           )}
 

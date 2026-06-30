@@ -5,8 +5,11 @@ import { ArrowRight, RefreshCw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from "./category-badge";
 import { PriorityBadge } from "./priority-badge";
+import { DifficultyBadge } from "./difficulty-badge";
 import { OverdueBadge } from "./overdue-badge";
+import { AvoidedBadge } from "./avoided-badge";
 import { isOverdue } from "@/lib/overdue";
+import { getAvoidanceScore, daysSinceCreated, AVOIDANCE_THRESHOLD } from "@/lib/tasks";
 import { usePomodoroStore } from "@/store/pomodoroStore";
 import type { Task } from "@/types";
 
@@ -17,6 +20,7 @@ interface FocusPickCardProps {
 }
 
 function reasonFor(task: Task): string {
+  if (getAvoidanceScore(task) >= AVOIDANCE_THRESHOLD) return "You keep skipping this one. Today it goes first.";
   if (isOverdue(task)) return "It's overdue — clearing this unblocks everything else.";
   if (task.priority === "HIGH") return "Highest priority on your list right now.";
   if (task.estimatedMinutes && task.estimatedMinutes <= 15) return "A quick win — done in under 15 minutes.";
@@ -60,7 +64,9 @@ export function FocusPickCard({ task, onAnother, canShowAnother }: FocusPickCard
       <div className="relative mt-3 flex flex-wrap items-center gap-1.5">
         <CategoryBadge category={task.category} />
         <PriorityBadge priority={task.priority} />
+        <DifficultyBadge difficulty={task.difficulty} />
         {isOverdue(task) && <OverdueBadge />}
+        {getAvoidanceScore(task) >= AVOIDANCE_THRESHOLD && <AvoidedBadge days={daysSinceCreated(task)} />}
         {task.estimatedMinutes && (
           <span className="text-xs text-muted-foreground">~{task.estimatedMinutes} min</span>
         )}

@@ -9,10 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Category, Priority, TaskFilters } from "@/types";
+import type { Category, Priority, Difficulty, TaskFilters } from "@/types";
 
 const CATEGORIES: Category[] = ["Business", "CAC/Projects", "Learning", "Personal", "Other"];
 const PRIORITIES: Priority[] = ["HIGH", "MEDIUM", "LOW"];
+const DIFFICULTIES: Difficulty[] = ["EASY", "MEDIUM", "HARD"];
 
 interface TaskFiltersBarProps {
   filters: TaskFilters;
@@ -20,7 +21,7 @@ interface TaskFiltersBarProps {
 }
 
 export function TaskFiltersBar({ filters, onChange }: TaskFiltersBarProps) {
-  const hasFilters = filters.category || filters.priority;
+  const hasFilters = filters.category || filters.priority || filters.difficulty;
 
   return (
     <div className="flex items-center gap-2">
@@ -58,11 +59,28 @@ export function TaskFiltersBar({ filters, onChange }: TaskFiltersBarProps) {
         </SelectContent>
       </Select>
 
+      <Select
+        value={filters.difficulty ?? "all"}
+        onValueChange={(v) => onChange({ ...filters, difficulty: v === "all" ? undefined : (v as Difficulty) })}
+      >
+        <SelectTrigger className="h-9 w-[140px]">
+          <SelectValue placeholder="Difficulty" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All difficulties</SelectItem>
+          {DIFFICULTIES.map((d) => (
+            <SelectItem key={d} value={d}>
+              {d.charAt(0) + d.slice(1).toLowerCase()}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
       {hasFilters && (
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onChange({ ...filters, category: undefined, priority: undefined })}
+          onClick={() => onChange({ ...filters, category: undefined, priority: undefined, difficulty: undefined })}
         >
           <X className="mr-1 h-3.5 w-3.5" /> Clear
         </Button>
