@@ -9,6 +9,8 @@ import { useTaskStore } from "@/store/taskStore";
 import { useHabitStore } from "@/store/habitStore";
 import { useFocusStore } from "@/store/focusStore";
 import { useSettingsStore, getSettingsSnapshot } from "@/store/settingsStore";
+import { useReflectionStore } from "@/store/reflectionStore";
+import { useBlockerStore } from "@/store/blockerStore";
 import { buildExportPayload, downloadJson } from "@/lib/export";
 
 type ActiveDialog = "clearCompleted" | "resetHabits" | "resetEverything" | null;
@@ -89,6 +91,8 @@ export function DataSection() {
           useHabitStore.getState().resetAll();
           useFocusStore.getState().resetAll();
           useSettingsStore.getState().resetAll();
+          useReflectionStore.getState().resetAll();
+          useBlockerStore.getState().resetAll();
         }}
       />
     </Card>

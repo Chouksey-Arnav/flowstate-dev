@@ -1,6 +1,7 @@
 import { ProfileSection } from "@/components/settings/profile-section";
 import { PomodoroSection } from "@/components/settings/pomodoro-section";
 import { BehaviorSection } from "@/components/settings/behavior-section";
+import { BlockerSection } from "@/components/settings/blocker-section";
 import { DataSection } from "@/components/settings/data-section";
 
 export default function SettingsPage() {
@@ -10,6 +11,7 @@ export default function SettingsPage() {
       <ProfileSection />
       <PomodoroSection />
       <BehaviorSection />
+      <BlockerSection />
       <DataSection />
     </div>
   );

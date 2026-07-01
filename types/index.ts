@@ -86,3 +86,39 @@ export interface TaskFilters {
   difficulty?: Difficulty;
   status?: TaskStatus;
 }
+
+/** Why someone is stalling, in their own words — kept short and honest. */
+export type ReflectionReason =
+  | "unclear-start"
+  | "boredom-distraction"
+  | "too-hard"
+  | "low-energy"
+  | "fear-perfectionism"
+  | "not-urgent"
+  | "other";
+
+export type ReflectionContext = "skip" | "intention";
+
+export interface ReflectionEntry {
+  id: string;
+  taskId?: string;
+  context: ReflectionContext;
+  reason: ReflectionReason;
+  note?: string;
+  /** For "intention" entries: the plan for when the urge to check a distraction hits. */
+  ifUrgePlan?: string;
+  createdAt: string; // ISO
+}
+
+/** A domain the user wants blocked on this machine, e.g. "youtube.com". */
+export interface BlockedSite {
+  id: string;
+  domain: string;
+}
+
+export interface BlockerSchedule {
+  enabled: boolean;
+  startTime: string; // "09:00"
+  endTime: string; // "17:00"
+  days: number[]; // 0 (Sun) - 6 (Sat)
+}

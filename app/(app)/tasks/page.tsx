@@ -14,8 +14,10 @@ import { ArchiveView } from "@/components/tasks/archive-view";
 import { UndoToast } from "@/components/tasks/undo-toast";
 import { MomentumBar } from "@/components/tasks/momentum-bar";
 import { FocusPickCard } from "@/components/tasks/focus-pick-card";
+import { SkipReasonDialog } from "@/components/tasks/skip-reason-dialog";
 import { useTaskStore } from "@/store/taskStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useReflectionStore } from "@/store/reflectionStore";
 import { getActiveTasks, filterTasks, sortTasks, reorderTasks, getFocusPick } from "@/lib/tasks";
 import { fireTaskCompleteConfetti } from "@/lib/confetti";
 import { playCompletionChime } from "@/lib/audio";
@@ -37,6 +39,7 @@ export default function TasksPage() {
 
   const soundEnabled = useSettingsStore((s) => s.soundEnabled);
   const confettiEnabled = useSettingsStore((s) => s.confettiEnabled);
+  const addReflection = useReflectionStore((s) => s.addEntry);
 
   const [filters, setFilters] = useState<TaskFilters>({});
   const [sortBy, setSortBy] = useState<SortBy>("smart");
@@ -46,6 +49,7 @@ export default function TasksPage() {
   const [view, setView] = useState<"active" | "archive">("active");
   const [undo, setUndo] = useState<{ taskId: string; message: string } | null>(null);
   const [skippedFocusId, setSkippedFocusId] = useState<string | undefined>(undefined);
+  const [skipReasonTaskId, setSkipReasonTaskId] = useState<string | undefined>(undefined);
 
   const activeTasks = getActiveTasks(tasks);
   const filtered = filterTasks(activeTasks, filters);
@@ -134,6 +138,7 @@ export default function TasksPage() {
               onAnother={() => {
                 skipTask(focusPick.id);
                 setSkippedFocusId(focusPick.id);
+                setSkipReasonTaskId(focusPick.id);
               }}
             />
           )}
@@ -182,6 +187,15 @@ export default function TasksPage() {
       )}
 
       <TaskFormDialog open={dialogOpen} onOpenChange={setDialogOpen} task={editingTask} />
+
+      <SkipReasonDialog
+        open={!!skipReasonTaskId}
+        taskTitle={tasks.find((t) => t.id === skipReasonTaskId)?.title ?? ""}
+        onOpenChange={(open) => !open && setSkipReasonTaskId(undefined)}
+        onSelect={(reason) =>
+          skipReasonTaskId && addReflection({ context: "skip", reason, taskId: skipReasonTaskId })
+        }
+      />
 
       {undo && (
         <UndoToast
