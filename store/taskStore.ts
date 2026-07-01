@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Task, SubTask } from "@/types";
+import type { Task, SubTask, Difficulty } from "@/types";
 import { generateId } from "@/lib/id";
 import { getNextOrder } from "@/lib/tasks";
 
@@ -8,7 +8,8 @@ interface TaskState {
   tasks: Task[];
   hasHydrated: boolean;
   setHasHydrated: (value: boolean) => void;
-  addTask: (input: Omit<Task, "id" | "createdAt" | "status" | "subtasks" | "tags" | "order"> & {
+  addTask: (input: Omit<Task, "id" | "createdAt" | "status" | "subtasks" | "tags" | "order" | "timesSkipped" | "difficulty"> & {
+    difficulty?: Difficulty;
     subtasks?: SubTask[];
     tags?: string[];
   }) => Task;
@@ -23,6 +24,7 @@ interface TaskState {
   deleteSubtask: (taskId: string, subtaskId: string) => void;
   reorderAll: (tasks: Task[]) => void;
   clearCompleted: () => void;
+  skipTask: (id: string) => void;
   resetAll: () => void;
 }
 
@@ -40,12 +42,14 @@ export const useTaskStore = create<TaskState>()(
           description: input.description,
           category: input.category,
           priority: input.priority,
+          difficulty: input.difficulty ?? "MEDIUM",
           status: "active",
           dueDate: input.dueDate,
           estimatedMinutes: input.estimatedMinutes,
           subtasks: input.subtasks ?? [],
           tags: input.tags ?? [],
           order: getNextOrder(get().tasks),
+          timesSkipped: 0,
           createdAt: new Date().toISOString(),
         };
         set((state) => ({ tasks: [...state.tasks, task] }));
@@ -121,10 +125,27 @@ export const useTaskStore = create<TaskState>()(
       clearCompleted: () =>
         set((state) => ({ tasks: state.tasks.filter((t) => t.status !== "completed") })),
 
+      skipTask: (id) =>
+        set((state) => ({
+          tasks: state.tasks.map((t) =>
+            t.id === id ? { ...t, timesSkipped: t.timesSkipped + 1 } : t
+          ),
+        })),
+
       resetAll: () => set({ tasks: [] }),
     }),
     {
       name: "flowstate-tasks",
+      version: 1,
+      migrate: (persistedState) => {
+        const state = persistedState as { tasks?: Partial<Task>[] };
+        const tasks: Task[] = (state.tasks ?? []).map((t) => ({
+          difficulty: "MEDIUM" as Difficulty,
+          timesSkipped: 0,
+          ...t,
+        })) as Task[];
+        return { ...state, tasks };
+      },
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

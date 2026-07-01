@@ -20,6 +20,8 @@ interface SettingsState extends Settings {
   hasHydrated: boolean;
   setHasHydrated: (value: boolean) => void;
   updateSettings: (updates: Partial<Settings>) => void;
+  setCommitment: (taskId: string, date: string) => void;
+  clearCommitment: () => void;
   resetAll: () => void;
 }
 
@@ -30,6 +32,8 @@ export const useSettingsStore = create<SettingsState>()(
       hasHydrated: false,
       setHasHydrated: (value) => set({ hasHydrated: value }),
       updateSettings: (updates) => set((state) => ({ ...state, ...updates })),
+      setCommitment: (taskId, date) => set({ commitTaskId: taskId, commitDate: date }),
+      clearCommitment: () => set({ commitTaskId: undefined, commitDate: undefined }),
       resetAll: () => set({ ...DEFAULT_SETTINGS }),
     }),
     {

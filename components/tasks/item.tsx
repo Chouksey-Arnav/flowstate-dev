@@ -12,12 +12,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PriorityBadge } from "./priority-badge";
+import { DifficultyBadge } from "./difficulty-badge";
 import { CategoryBadge } from "./category-badge";
 import { OverdueBadge } from "./overdue-badge";
+import { AvoidedBadge } from "./avoided-badge";
 import { SubtaskList } from "./subtask-list";
 import { cn } from "@/lib/utils";
 import { formatDisplayDate } from "@/lib/dates";
 import { isOverdue } from "@/lib/overdue";
+import { getAvoidanceScore, daysSinceCreated, AVOIDANCE_THRESHOLD } from "@/lib/tasks";
 import { usePomodoroStore } from "@/store/pomodoroStore";
 import type { Task } from "@/types";
 
@@ -62,6 +65,7 @@ export function TaskItem({
   const overdue = isOverdue(task);
   const subtaskDone = task.subtasks.filter((s) => s.completed).length;
   const quickWin = !completed && !!task.estimatedMinutes && task.estimatedMinutes <= 15;
+  const avoided = !completed && !archived && getAvoidanceScore(task) >= AVOIDANCE_THRESHOLD;
 
   const PRIORITY_ACCENT: Record<string, string> = {
     HIGH: "border-l-flow-red",
@@ -116,7 +120,9 @@ export function TaskItem({
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             <CategoryBadge category={task.category} />
             <PriorityBadge priority={task.priority} />
+            <DifficultyBadge difficulty={task.difficulty} />
             {overdue && <OverdueBadge />}
+            {avoided && <AvoidedBadge days={daysSinceCreated(task)} />}
             {quickWin && (
               <span className="flex items-center gap-1 rounded-full border border-flow-blue/30 bg-flow-blue/10 px-2 py-0.5 text-xs font-medium text-flow-blue">
                 <Zap className="h-3 w-3" /> Quick win

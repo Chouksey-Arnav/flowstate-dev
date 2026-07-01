@@ -7,6 +7,8 @@ export type Category =
 
 export type Priority = "HIGH" | "MEDIUM" | "LOW";
 
+export type Difficulty = "EASY" | "MEDIUM" | "HARD";
+
 export type TaskStatus = "active" | "completed" | "archived";
 
 export interface SubTask {
@@ -21,12 +23,14 @@ export interface Task {
   description?: string;
   category: Category;
   priority: Priority;
+  difficulty: Difficulty;
   status: TaskStatus;
   dueDate?: string; // local date key, YYYY-MM-DD
   estimatedMinutes?: number;
   subtasks: SubTask[];
   tags: string[];
   order: number;
+  timesSkipped: number;
   createdAt: string; // ISO timestamp
   completedAt?: string; // ISO timestamp
 }
@@ -70,6 +74,8 @@ export interface Settings {
   timerSoundType: TimerSoundType;
   autoStartNext: boolean;
   firstDayOfWeek: FirstDayOfWeek;
+  commitTaskId?: string;
+  commitDate?: string; // local date key, YYYY-MM-DD
 }
 
 export type SortBy = "smart" | "dueDate" | "priority" | "created" | "manual";
@@ -77,5 +83,6 @@ export type SortBy = "smart" | "dueDate" | "priority" | "created" | "manual";
 export interface TaskFilters {
   category?: Category;
   priority?: Priority;
+  difficulty?: Difficulty;
   status?: TaskStatus;
 }

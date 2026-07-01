@@ -22,10 +22,11 @@ import {
 import { SubtaskList } from "./subtask-list";
 import { useTaskStore } from "@/store/taskStore";
 import { generateId } from "@/lib/id";
-import type { Task, Category, Priority, SubTask } from "@/types";
+import type { Task, Category, Priority, Difficulty, SubTask } from "@/types";
 
 const CATEGORIES: Category[] = ["Business", "CAC/Projects", "Learning", "Personal", "Other"];
 const PRIORITIES: Priority[] = ["HIGH", "MEDIUM", "LOW"];
+const DIFFICULTIES: Difficulty[] = ["EASY", "MEDIUM", "HARD"];
 
 interface TaskFormDialogProps {
   open: boolean;
@@ -41,6 +42,7 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<Category>("Other");
   const [priority, setPriority] = useState<Priority>("MEDIUM");
+  const [difficulty, setDifficulty] = useState<Difficulty>("MEDIUM");
   const [dueDate, setDueDate] = useState("");
   const [estimatedMinutes, setEstimatedMinutes] = useState("");
   const [subtasks, setSubtasks] = useState<SubTask[]>([]);
@@ -51,6 +53,7 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
       setDescription(task?.description ?? "");
       setCategory(task?.category ?? "Other");
       setPriority(task?.priority ?? "MEDIUM");
+      setDifficulty(task?.difficulty ?? "MEDIUM");
       setDueDate(task?.dueDate ?? "");
       setEstimatedMinutes(task?.estimatedMinutes ? String(task.estimatedMinutes) : "");
       setSubtasks(task?.subtasks ?? []);
@@ -64,6 +67,7 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
       description: description.trim() || undefined,
       category,
       priority,
+      difficulty,
       dueDate: dueDate || undefined,
       estimatedMinutes: estimatedMinutes ? Number(estimatedMinutes) : undefined,
       subtasks,
@@ -133,6 +137,24 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
                   {PRIORITIES.map((p) => (
                     <SelectItem key={p} value={p}>
                       {p}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Difficulty</Label>
+              <Select value={difficulty} onValueChange={(v) => setDifficulty(v as Difficulty)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DIFFICULTIES.map((d) => (
+                    <SelectItem key={d} value={d}>
+                      {d.charAt(0) + d.slice(1).toLowerCase()}
                     </SelectItem>
                   ))}
                 </SelectContent>
