@@ -3,6 +3,7 @@
 import { useTaskStore } from "@/store/taskStore";
 import { useHabitStore } from "@/store/habitStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useReflectionStore } from "@/store/reflectionStore";
 import { Greeting } from "@/components/dashboard/greeting";
 import { DateCounter } from "@/components/dashboard/date-counter";
 import { StreakCard } from "@/components/dashboard/streak-card";
@@ -12,6 +13,7 @@ import { PomodoroMiniWidget } from "@/components/dashboard/pomodoro-mini-widget"
 import { MotivationalQuote } from "@/components/dashboard/motivational-quote";
 import { CommitmentCard } from "@/components/dashboard/commitment-card";
 import { AvoidedTasksCard } from "@/components/dashboard/avoided-tasks-card";
+import { ReflectionInsightCard } from "@/components/dashboard/reflection-insight-card";
 import { TodayProgressCard } from "@/components/dashboard/today-progress-card";
 import { HabitStatusRow } from "@/components/dashboard/habit-status-row";
 import { WeeklyChartMini } from "@/components/dashboard/weekly-chart-mini";
@@ -26,6 +28,7 @@ export default function DashboardPage() {
   const tasks = useTaskStore((s) => s.tasks);
   const completeTask = useTaskStore((s) => s.completeTask);
   const habits = useHabitStore((s) => s.habits);
+  const reflectionEntries = useReflectionStore((s) => s.entries);
   const dailyGoal = useSettingsStore((s) => s.dailyGoal);
   const name = useSettingsStore((s) => s.name);
   const firstDayOfWeek = useSettingsStore((s) => s.firstDayOfWeek);
@@ -75,6 +78,8 @@ export default function DashboardPage() {
       />
 
       <AvoidedTasksCard tasks={avoidedTasks} />
+
+      <ReflectionInsightCard entries={reflectionEntries} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StreakCard current={streak.current} best={streak.best} />

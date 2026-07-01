@@ -8,14 +8,17 @@ import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { useFocusStore } from "@/store/focusStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTaskStore } from "@/store/taskStore";
+import { useReflectionStore } from "@/store/reflectionStore";
 import { PomodoroWidget } from "@/components/focus/pomodoro-widget";
 import { SessionTaskPicker } from "@/components/focus/session-task-picker";
 import { VideoGrid } from "@/components/focus/video-grid";
 import { MotivationVideos } from "@/components/focus/motivation-videos";
 import { FullFocusMode } from "@/components/focus/full-focus-mode";
 import { AmbientSoundControl } from "@/components/focus/ambient-sound-control";
+import { IntentionDialog } from "@/components/focus/intention-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { toDateKey } from "@/lib/dates";
 import type { AmbientSound } from "@/types";
 
 export default function FocusPage() {
@@ -23,15 +26,40 @@ export default function FocusPage() {
   const [focusModeOpen, setFocusModeOpen] = useState(false);
   const [ambientEnabled, setAmbientEnabled] = useState(false);
   const [ambientVolume, setAmbientVolume] = useState(0.3);
+  const [intentionOpen, setIntentionOpen] = useState(false);
 
   const ambientSound = useSettingsStore((s) => s.ambientSound);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const sessions = useFocusStore((s) => s.sessions);
   const tasks = useTaskStore((s) => s.tasks);
+  const lastIntentionDate = useReflectionStore((s) => s.lastIntentionDate);
+  const setLastIntentionDate = useReflectionStore((s) => s.setLastIntentionDate);
+  const addReflection = useReflectionStore((s) => s.addEntry);
 
   const pomodoro = usePomodoro();
   const { setTaskId } = pomodoro;
   useAmbientSound(ambientSound, ambientEnabled, ambientVolume);
+
+  function handleStart() {
+    if (pomodoro.phase === "work" && lastIntentionDate !== toDateKey()) {
+      setIntentionOpen(true);
+      return;
+    }
+    pomodoro.start();
+  }
+
+  function handleIntentionConfirm(payload: { whyItMatters: string; ifUrgePlan: string }) {
+    addReflection({
+      context: "intention",
+      reason: "other",
+      taskId: pomodoro.taskId,
+      note: payload.whyItMatters || undefined,
+      ifUrgePlan: payload.ifUrgePlan,
+    });
+    setLastIntentionDate(toDateKey());
+    setIntentionOpen(false);
+    pomodoro.start();
+  }
 
   useEffect(() => {
     const queryTaskId = searchParams.get("taskId");
@@ -53,7 +81,7 @@ export default function FocusPage() {
       remainingMs={pomodoro.remainingMs}
       totalMs={pomodoro.totalMs}
       cyclesCompleted={pomodoro.cyclesCompleted}
-      onStart={pomodoro.start}
+      onStart={handleStart}
       onPause={pomodoro.pause}
       onReset={pomodoro.reset}
       onSkip={pomodoro.skip}
@@ -120,6 +148,13 @@ export default function FocusPage() {
       <FullFocusMode open={focusModeOpen} onClose={() => setFocusModeOpen(false)}>
         {widget}
       </FullFocusMode>
+
+      <IntentionDialog
+        open={intentionOpen}
+        taskTitle={tasks.find((t) => t.id === pomodoro.taskId)?.title}
+        onOpenChange={setIntentionOpen}
+        onConfirm={handleIntentionConfirm}
+      />
     </div>
   );
 }
