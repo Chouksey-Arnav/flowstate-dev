@@ -62,8 +62,11 @@ export function BlockerSection() {
     downloadTextFile("flowstate-block.sh", generateBlockerScript(sites));
   }
 
-  function handleDownloadSchedulePlists() {
+  function handleDownloadOnPlist() {
     downloadTextFile("com.flowstate.blocker.on.plist", generateLaunchdPlist(schedule, SCRIPT_PATH));
+  }
+
+  function handleDownloadOffPlist() {
     downloadTextFile("com.flowstate.blocker.off.plist", generateLaunchdOffPlist(schedule, SCRIPT_PATH));
   }
 
@@ -189,9 +192,14 @@ export function BlockerSection() {
             <Download className="mr-2 h-4 w-4" /> Download blocker script (flowstate-block.sh)
           </Button>
           {schedule.enabled && (
-            <Button variant="outline" className="w-full justify-start" onClick={handleDownloadSchedulePlists}>
-              <Download className="mr-2 h-4 w-4" /> Download schedule files (LaunchDaemon plists)
-            </Button>
+            <>
+              <Button variant="outline" className="w-full justify-start" onClick={handleDownloadOnPlist}>
+                <Download className="mr-2 h-4 w-4" /> Download ON schedule (com.flowstate.blocker.on.plist)
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={handleDownloadOffPlist}>
+                <Download className="mr-2 h-4 w-4" /> Download OFF schedule (com.flowstate.blocker.off.plist)
+              </Button>
+            </>
           )}
           <details className="rounded-lg border border-border/60 bg-secondary/30 p-3 text-xs text-muted-foreground">
             <summary className="cursor-pointer font-medium text-foreground">Install instructions (macOS Terminal)</summary>
