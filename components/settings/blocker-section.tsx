@@ -203,8 +203,11 @@ export function BlockerSection() {
               <li>Check status: <code className="rounded bg-background px-1 py-0.5">{SCRIPT_PATH} status</code></li>
               {schedule.enabled && (
                 <>
-                  <li>For the schedule: move both .plist files to <code className="rounded bg-background px-1 py-0.5">/Library/LaunchDaemons/</code>, then <code className="rounded bg-background px-1 py-0.5">sudo launchctl load /Library/LaunchDaemons/com.flowstate.blocker.on.plist</code> and the same for the &quot;.off&quot; file.</li>
-                  <li>To stop the schedule later: <code className="rounded bg-background px-1 py-0.5">sudo launchctl unload /Library/LaunchDaemons/com.flowstate.blocker.on.plist</code> (and &quot;.off&quot;).</li>
+                  <li>Copy the on.plist file: <code className="rounded bg-background px-1 py-0.5">sudo cp ~/Downloads/com.flowstate.blocker.on.plist /Library/LaunchDaemons/</code></li>
+                  <li>Copy the off.plist file: <code className="rounded bg-background px-1 py-0.5">sudo cp ~/Downloads/com.flowstate.blocker.off.plist /Library/LaunchDaemons/</code></li>
+                  <li>Load the on schedule: <code className="rounded bg-background px-1 py-0.5">sudo launchctl load /Library/LaunchDaemons/com.flowstate.blocker.on.plist</code></li>
+                  <li>Load the off schedule: <code className="rounded bg-background px-1 py-0.5">sudo launchctl load /Library/LaunchDaemons/com.flowstate.blocker.off.plist</code></li>
+                  <li className="text-xs">To stop the schedule later: <code className="rounded bg-background px-1 py-0.5">sudo launchctl unload /Library/LaunchDaemons/com.flowstate.blocker.on.plist</code> and <code className="rounded bg-background px-1 py-0.5">sudo launchctl unload /Library/LaunchDaemons/com.flowstate.blocker.off.plist</code></li>
                 </>
               )}
               <li>Changed your domain list? Re-download the script and repeat step 1 — it overwrites the old one.</li>

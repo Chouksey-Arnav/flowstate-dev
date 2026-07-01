@@ -20,6 +20,7 @@ set -euo pipefail
 HOSTS_FILE="/etc/hosts"
 MARKER_START="# >>> flowstate-block >>>"
 MARKER_END="# <<< flowstate-block <<<"
+DEBUG="${DEBUG:-0}"
 
 DOMAINS=(
   "youtube.com"
@@ -38,10 +39,25 @@ flush_dns() {
 }
 
 block_on() {
+  if [ ! -f "$HOSTS_FILE" ]; then
+    echo "Error: $HOSTS_FILE not found. Are you on macOS or Linux?" >&2
+    exit 1
+  fi
+
+  if [ ! -w "$HOSTS_FILE" ]; then
+    echo "Error: Cannot write to $HOSTS_FILE. Did you use 'sudo'?" >&2
+    exit 1
+  fi
+
   if grep -q "$MARKER_START" "$HOSTS_FILE" 2>/dev/null; then
     echo "Already blocking. Run '$0 off' first to change the list."
     exit 0
   fi
+
+  if [ "$DEBUG" = "1" ]; then
+    echo "[DEBUG] Adding $(( ${#DOMAINS[@]} * 2 )) lines to $HOSTS_FILE"
+  fi
+
   {
     echo "$MARKER_START"
     for d in "${DOMAINS[@]}"; do
@@ -49,9 +65,10 @@ block_on() {
       echo "::1 $d"
     done
     echo "$MARKER_END"
-  } >> "$HOSTS_FILE"
+  } >> "$HOSTS_FILE" || { echo "Error: Failed to write to $HOSTS_FILE" >&2; exit 1; }
+
   flush_dns
-  echo "Blocking ${#DOMAINS[@]} domain(s): ${DOMAINS[*]}"
+  echo "✓ Blocking ${#DOMAINS[@]} domain(s): ${DOMAINS[*]}"
 }
 
 block_off() {
@@ -59,10 +76,20 @@ block_off() {
     echo "Not currently blocking."
     exit 0
   fi
-  sed -i.flowstate.bak "/$MARKER_START/,/$MARKER_END/d" "$HOSTS_FILE"
+
+  if [ ! -w "$HOSTS_FILE" ]; then
+    echo "Error: Cannot write to $HOSTS_FILE. Did you use 'sudo'?" >&2
+    exit 1
+  fi
+
+  if [ "$DEBUG" = "1" ]; then
+    echo "[DEBUG] Removing flowstate block from $HOSTS_FILE"
+  fi
+
+  sed -i.flowstate.bak "/$MARKER_START/,/$MARKER_END/d" "$HOSTS_FILE" || { echo "Error: Failed to edit $HOSTS_FILE" >&2; exit 1; }
   rm -f "$HOSTS_FILE.flowstate.bak"
   flush_dns
-  echo "Blocking removed."
+  echo "✓ Blocking removed."
 }
 
 block_status() {
@@ -75,11 +102,28 @@ block_status() {
 }
 
 case "${1:-}" in
-  on) block_on ;;
-  off) block_off ;;
-  status) block_status ;;
+  on)
+    if [ "$EUID" -ne 0 ]; then
+      echo "Error: 'on' requires sudo. Run: sudo $0 on" >&2
+      exit 1
+    fi
+    block_on
+    ;;
+  off)
+    if [ "$EUID" -ne 0 ]; then
+      echo "Error: 'off' requires sudo. Run: sudo $0 off" >&2
+      exit 1
+    fi
+    block_off
+    ;;
+  status)
+    block_status
+    ;;
   *)
     echo "Usage: sudo $0 {on|off|status}"
+    echo "  on     - start blocking (requires sudo)"
+    echo "  off    - stop blocking (requires sudo)"
+    echo "  status - show current block status (no sudo needed)"
     exit 1
     ;;
 esac
