@@ -47,9 +47,19 @@ If you enable a schedule in Settings, the app also gives you two
 start/end times on the days you pick.
 
 ```bash
-sudo mv com.flowstate.blocker.on.plist com.flowstate.blocker.off.plist /Library/LaunchDaemons/
+# Make sure flowstate-block.sh is in place first (step 1-2 above)
+sudo cp com.flowstate.blocker.on.plist /Library/LaunchDaemons/
+sudo cp com.flowstate.blocker.off.plist /Library/LaunchDaemons/
 sudo launchctl load /Library/LaunchDaemons/com.flowstate.blocker.on.plist
 sudo launchctl load /Library/LaunchDaemons/com.flowstate.blocker.off.plist
+```
+
+**Common issue: Permission denied when copying plists?**
+
+If you see `sudo: cp: command not found` or a permission error, try:
+```bash
+sudo install -m 644 com.flowstate.blocker.on.plist /Library/LaunchDaemons/
+sudo install -m 644 com.flowstate.blocker.off.plist /Library/LaunchDaemons/
 ```
 
 To stop the schedule later:
@@ -58,6 +68,27 @@ To stop the schedule later:
 sudo launchctl unload /Library/LaunchDaemons/com.flowstate.blocker.on.plist
 sudo launchctl unload /Library/LaunchDaemons/com.flowstate.blocker.off.plist
 ```
+
+## Troubleshooting
+
+**"zsh: permission denied: /Library/LaunchDaemons/"**
+- Make sure you're using `sudo cp` (not just `cp`) to copy the plist files
+- Check that both plist files exist: `ls ~/Downloads/com.flowstate.blocker.*.plist`
+- Verify `/Library/LaunchDaemons/` is writable: `sudo ls -ld /Library/LaunchDaemons/` should show `rwx` for owner
+
+**"Already blocking. Run '$0 off' first..."**
+- The blocker is already on. Run `sudo /usr/local/bin/flowstate-block.sh off` to disable it, then try again
+
+**"Cannot write to /etc/hosts. Did you use 'sudo'?"**
+- Always prefix with `sudo`: `sudo /usr/local/bin/flowstate-block.sh on`
+
+**"launchctl load failed"**
+- Verify the plist file syntax: `plutil -lint /Library/LaunchDaemons/com.flowstate.blocker.on.plist`
+- Check the script path in the plist points to `/usr/local/bin/flowstate-block.sh`
+- Ensure the script is executable: `sudo chmod +x /usr/local/bin/flowstate-block.sh`
+
+**Debugging mode**
+- Run with debug output: `DEBUG=1 sudo /usr/local/bin/flowstate-block.sh on`
 
 ## Honesty about limits
 
