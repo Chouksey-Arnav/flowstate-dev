@@ -1,11 +1,20 @@
-import type { Difficulty, Priority } from "@/types";
+import type { Difficulty, Priority, Task } from "@/types";
 
 const DIFFICULTY_XP: Record<Difficulty, number> = { EASY: 10, MEDIUM: 20, HARD: 35 };
 const PRIORITY_MULTIPLIER: Record<Priority, number> = { LOW: 1, MEDIUM: 1.2, HIGH: 1.5 };
 
+export const MIN_CUSTOM_XP = 1;
+export const MAX_CUSTOM_XP = 500;
+
 /** Harder, higher-priority tasks are worth more — XP should reward tackling the real work, not just checking boxes. */
 export function xpForTaskCompletion(difficulty: Difficulty, priority: Priority): number {
   return Math.round(DIFFICULTY_XP[difficulty] * PRIORITY_MULTIPLIER[priority]);
+}
+
+/** The XP a task will actually award — a manual override always wins over the computed value. */
+export function xpForTask(task: Pick<Task, "difficulty" | "priority" | "xpOverride">): number {
+  if (typeof task.xpOverride === "number" && task.xpOverride > 0) return task.xpOverride;
+  return xpForTaskCompletion(task.difficulty, task.priority);
 }
 
 export const HABIT_CHECKIN_XP = 15;

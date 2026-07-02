@@ -33,6 +33,8 @@ export interface Task {
   timesSkipped: number;
   createdAt: string; // ISO timestamp
   completedAt?: string; // ISO timestamp
+  /** Manual XP override — when set, this exact amount is awarded instead of the computed value. */
+  xpOverride?: number;
 }
 
 export type HabitCategory = "Health" | "Business" | "Learning" | "Mental" | "Misc";

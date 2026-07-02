@@ -17,11 +17,12 @@ export function XpBar({ collapsed }: XpBarProps) {
 
   const { level, xpIntoLevel, xpForNextLevel, progress } = getLevelProgress(totalXp);
   const title = getLevelTitle(level);
+  const almostThere = progress >= 0.85;
 
   if (collapsed) {
     return (
       <div className="flex flex-col items-center gap-1 px-2 py-3" title={`Level ${level} · ${title}`}>
-        <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-secondary">
+        <div className={cn("relative flex h-8 w-8 items-center justify-center rounded-full bg-secondary", almostThere && "glow-ring")}>
           <Sparkles className="h-3.5 w-3.5 text-primary" />
         </div>
         <span className="text-[10px] font-semibold tabular-nums text-muted-foreground">Lv{level}</span>
@@ -33,7 +34,7 @@ export function XpBar({ collapsed }: XpBarProps) {
     <div className="space-y-1.5 px-3 py-3">
       <div className="flex items-center justify-between text-xs">
         <span className="flex items-center gap-1.5 font-semibold text-foreground">
-          <Sparkles className="h-3.5 w-3.5 text-primary" />
+          <Sparkles className={cn("h-3.5 w-3.5 text-primary", almostThere && "animate-pulse-slow")} />
           Level {level}
         </span>
         <span className="text-muted-foreground">{title}</span>
@@ -47,7 +48,7 @@ export function XpBar({ collapsed }: XpBarProps) {
         />
       </div>
       <p className="text-right text-[10px] tabular-nums text-muted-foreground">
-        {xpIntoLevel}/{xpForNextLevel} XP
+        {almostThere ? `${xpForNextLevel - xpIntoLevel} XP to level up!` : `${xpIntoLevel}/${xpForNextLevel} XP`}
       </p>
     </div>
   );

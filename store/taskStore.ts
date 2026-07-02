@@ -4,7 +4,7 @@ import type { Task, SubTask, Difficulty } from "@/types";
 import { generateId } from "@/lib/id";
 import { getNextOrder } from "@/lib/tasks";
 import { toDateKey } from "@/lib/dates";
-import { xpForTaskCompletion, DAILY_GOAL_BONUS_XP } from "@/lib/xp";
+import { xpForTask, DAILY_GOAL_BONUS_XP } from "@/lib/xp";
 import { useXpStore } from "./xpStore";
 import { useSettingsStore } from "./settingsStore";
 
@@ -12,10 +12,11 @@ interface TaskState {
   tasks: Task[];
   hasHydrated: boolean;
   setHasHydrated: (value: boolean) => void;
-  addTask: (input: Omit<Task, "id" | "createdAt" | "status" | "subtasks" | "tags" | "order" | "timesSkipped" | "difficulty"> & {
+  addTask: (input: Omit<Task, "id" | "createdAt" | "status" | "subtasks" | "tags" | "order" | "timesSkipped" | "difficulty" | "xpOverride"> & {
     difficulty?: Difficulty;
     subtasks?: SubTask[];
     tags?: string[];
+    xpOverride?: number;
   }) => Task;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
@@ -55,6 +56,7 @@ export const useTaskStore = create<TaskState>()(
           order: getNextOrder(get().tasks),
           timesSkipped: 0,
           createdAt: new Date().toISOString(),
+          xpOverride: input.xpOverride,
         };
         set((state) => ({ tasks: [...state.tasks, task] }));
         return task;
@@ -78,7 +80,7 @@ export const useTaskStore = create<TaskState>()(
         }));
 
         useXpStore.getState().awardXp(
-          xpForTaskCompletion(task.difficulty, task.priority),
+          xpForTask(task),
           "task",
           `Completed "${task.title}"`
         );
