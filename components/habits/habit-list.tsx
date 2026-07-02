@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { HabitItem } from "./habit-item";
-import type { Habit } from "@/types";
+import type { FirstDayOfWeek, Habit } from "@/types";
 
 interface HabitListProps {
   habits: Habit[];
   weekDates: Date[];
   weekdayLabels: string[];
+  firstDayOfWeek: FirstDayOfWeek;
   onToggleDay: (habitId: string, dateKey: string) => void;
   onEdit: (habit: Habit) => void;
   onDelete: (id: string) => void;
@@ -19,6 +20,7 @@ export function HabitList({
   habits,
   weekDates,
   weekdayLabels,
+  firstDayOfWeek,
   onToggleDay,
   onEdit,
   onDelete,
@@ -42,6 +44,7 @@ export function HabitList({
               habit={habit}
               weekDates={weekDates}
               weekdayLabels={weekdayLabels}
+              firstDayOfWeek={firstDayOfWeek}
               draggable
               onToggleDay={(dateKey) => onToggleDay(habit.id, dateKey)}
               onEdit={() => onEdit(habit)}

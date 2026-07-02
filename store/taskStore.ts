@@ -3,6 +3,10 @@ import { persist } from "zustand/middleware";
 import type { Task, SubTask, Difficulty } from "@/types";
 import { generateId } from "@/lib/id";
 import { getNextOrder } from "@/lib/tasks";
+import { toDateKey } from "@/lib/dates";
+import { xpForTaskCompletion, DAILY_GOAL_BONUS_XP } from "@/lib/xp";
+import { useXpStore } from "./xpStore";
+import { useSettingsStore } from "./settingsStore";
 
 interface TaskState {
   tasks: Task[];
@@ -64,12 +68,30 @@ export const useTaskStore = create<TaskState>()(
       deleteTask: (id) =>
         set((state) => ({ tasks: state.tasks.filter((t) => t.id !== id) })),
 
-      completeTask: (id) =>
+      completeTask: (id) => {
+        const task = get().tasks.find((t) => t.id === id);
+        if (!task) return;
         set((state) => ({
           tasks: state.tasks.map((t) =>
             t.id === id ? { ...t, status: "completed", completedAt: new Date().toISOString() } : t
           ),
-        })),
+        }));
+
+        useXpStore.getState().awardXp(
+          xpForTaskCompletion(task.difficulty, task.priority),
+          "task",
+          `Completed "${task.title}"`
+        );
+
+        const todayKey = toDateKey();
+        const completedToday = get().tasks.filter(
+          (t) => t.completedAt && toDateKey(new Date(t.completedAt)) === todayKey
+        ).length;
+        const goal = useSettingsStore.getState().dailyTaskGoal;
+        if (goal > 0 && completedToday === goal) {
+          useXpStore.getState().awardXp(DAILY_GOAL_BONUS_XP, "dailyGoal", "Hit today's task goal!");
+        }
+      },
 
       uncompleteTask: (id) =>
         set((state) => ({

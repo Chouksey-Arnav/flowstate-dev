@@ -18,11 +18,17 @@ const DEFAULT_SCHEDULE: BlockerSchedule = {
 interface BlockerState {
   sites: BlockedSite[];
   schedule: BlockerSchedule;
+  /** Fingerprint of `sites` as of the last script download — lets the UI warn when the installed script has drifted out of sync. */
+  lastDownloadedSitesFingerprint: string | null;
+  /** Fingerprint of `schedule` as of the last plist download. */
+  lastDownloadedScheduleFingerprint: string | null;
   hasHydrated: boolean;
   setHasHydrated: (value: boolean) => void;
   addSite: (domain: string) => void;
   removeSite: (id: string) => void;
   updateSchedule: (updates: Partial<BlockerSchedule>) => void;
+  markScriptDownloaded: (fingerprint: string) => void;
+  markScheduleDownloaded: (fingerprint: string) => void;
   resetAll: () => void;
 }
 
@@ -40,6 +46,8 @@ export const useBlockerStore = create<BlockerState>()(
     (set, get) => ({
       sites: DEFAULT_SITES,
       schedule: DEFAULT_SCHEDULE,
+      lastDownloadedSitesFingerprint: null,
+      lastDownloadedScheduleFingerprint: null,
       hasHydrated: false,
       setHasHydrated: (value) => set({ hasHydrated: value }),
 
@@ -56,7 +64,16 @@ export const useBlockerStore = create<BlockerState>()(
       updateSchedule: (updates) =>
         set((state) => ({ schedule: { ...state.schedule, ...updates } })),
 
-      resetAll: () => set({ sites: DEFAULT_SITES, schedule: DEFAULT_SCHEDULE }),
+      markScriptDownloaded: (fingerprint) => set({ lastDownloadedSitesFingerprint: fingerprint }),
+      markScheduleDownloaded: (fingerprint) => set({ lastDownloadedScheduleFingerprint: fingerprint }),
+
+      resetAll: () =>
+        set({
+          sites: DEFAULT_SITES,
+          schedule: DEFAULT_SCHEDULE,
+          lastDownloadedSitesFingerprint: null,
+          lastDownloadedScheduleFingerprint: null,
+        }),
     }),
     {
       name: "flowstate-blocker",

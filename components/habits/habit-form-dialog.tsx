@@ -25,6 +25,16 @@ import type { Habit, HabitCategory } from "@/types";
 
 const CATEGORIES: HabitCategory[] = ["Health", "Business", "Learning", "Mental", "Misc"];
 
+const FREQUENCY_OPTIONS = [
+  { value: 7, label: "Every day" },
+  { value: 6, label: "6x / week" },
+  { value: 5, label: "5x / week" },
+  { value: 4, label: "4x / week" },
+  { value: 3, label: "3x / week" },
+  { value: 2, label: "2x / week" },
+  { value: 1, label: "1x / week" },
+];
+
 interface HabitFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -38,21 +48,23 @@ export function HabitFormDialog({ open, onOpenChange, habit }: HabitFormDialogPr
   const [name, setName] = useState("");
   const [icon, setIcon] = useState(HABIT_ICON_NAMES[0]);
   const [category, setCategory] = useState<HabitCategory>("Health");
+  const [timesPerWeek, setTimesPerWeek] = useState(7);
 
   useEffect(() => {
     if (open) {
       setName(habit?.name ?? "");
       setIcon(habit?.icon ?? HABIT_ICON_NAMES[0]);
       setCategory(habit?.category ?? "Health");
+      setTimesPerWeek(habit?.timesPerWeek ?? 7);
     }
   }, [open, habit]);
 
   function handleSubmit() {
     if (!name.trim()) return;
     if (habit) {
-      updateHabit(habit.id, { name: name.trim(), icon, category });
+      updateHabit(habit.id, { name: name.trim(), icon, category, timesPerWeek });
     } else {
-      addHabit({ name: name.trim(), icon, category });
+      addHabit({ name: name.trim(), icon, category, timesPerWeek });
     }
     onOpenChange(false);
   }
@@ -85,6 +97,22 @@ export function HabitFormDialog({ open, onOpenChange, habit }: HabitFormDialogPr
                 {CATEGORIES.map((c) => (
                   <SelectItem key={c} value={c}>
                     {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>How often</Label>
+            <Select value={String(timesPerWeek)} onValueChange={(v) => setTimesPerWeek(Number(v))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {FREQUENCY_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={String(opt.value)}>
+                    {opt.label}
                   </SelectItem>
                 ))}
               </SelectContent>

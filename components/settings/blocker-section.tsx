@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Ban, Download, Plus, X, ShieldAlert } from "lucide-react";
+import { Ban, Download, Plus, X, ShieldAlert, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useBlockerStore } from "@/store/blockerStore";
-import { generateBlockerScript, generateLaunchdOffPlist, generateLaunchdPlist, downloadTextFile } from "@/lib/blockerScript";
+import {
+  generateBlockerScript,
+  generateLaunchdOffPlist,
+  generateLaunchdPlist,
+  downloadTextFile,
+  getSitesFingerprint,
+  getScheduleFingerprint,
+} from "@/lib/blockerScript";
 
 const SUGGESTED_DOMAINS = [
   "youtube.com",
@@ -41,8 +48,17 @@ export function BlockerSection() {
   const addSite = useBlockerStore((s) => s.addSite);
   const removeSite = useBlockerStore((s) => s.removeSite);
   const updateSchedule = useBlockerStore((s) => s.updateSchedule);
+  const lastDownloadedSitesFingerprint = useBlockerStore((s) => s.lastDownloadedSitesFingerprint);
+  const lastDownloadedScheduleFingerprint = useBlockerStore((s) => s.lastDownloadedScheduleFingerprint);
+  const markScriptDownloaded = useBlockerStore((s) => s.markScriptDownloaded);
+  const markScheduleDownloaded = useBlockerStore((s) => s.markScheduleDownloaded);
 
   const [newDomain, setNewDomain] = useState("");
+
+  const currentSitesFingerprint = getSitesFingerprint(sites);
+  const currentScheduleFingerprint = getScheduleFingerprint(schedule);
+  const scriptInSync = lastDownloadedSitesFingerprint === currentSitesFingerprint;
+  const scheduleInSync = lastDownloadedScheduleFingerprint === currentScheduleFingerprint;
 
   function handleAdd(domain?: string) {
     const value = domain ?? newDomain;
@@ -60,14 +76,17 @@ export function BlockerSection() {
 
   function handleDownloadScript() {
     downloadTextFile("flowstate-block.sh", generateBlockerScript(sites));
+    markScriptDownloaded(currentSitesFingerprint);
   }
 
   function handleDownloadOnPlist() {
     downloadTextFile("com.flowstate.blocker.on.plist", generateLaunchdPlist(schedule, SCRIPT_PATH));
+    markScheduleDownloaded(currentScheduleFingerprint);
   }
 
   function handleDownloadOffPlist() {
     downloadTextFile("com.flowstate.blocker.off.plist", generateLaunchdOffPlist(schedule, SCRIPT_PATH));
+    markScheduleDownloaded(currentScheduleFingerprint);
   }
 
   const unaddedSuggestions = SUGGESTED_DOMAINS.filter(
@@ -188,11 +207,37 @@ export function BlockerSection() {
         </div>
 
         <div className="space-y-2 border-t border-border pt-4">
+          <div
+            className={cn(
+              "flex items-center gap-2 rounded-lg border px-3 py-2 text-xs",
+              scriptInSync
+                ? "border-flow-green/25 bg-flow-green/[0.06] text-flow-green"
+                : "border-flow-yellow/30 bg-flow-yellow/[0.06] text-flow-yellow"
+            )}
+          >
+            {scriptInSync ? (
+              <>
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                <span>Downloaded script matches your current blocklist.</span>
+              </>
+            ) : (
+              <>
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                <span>Your blocklist changed since you last downloaded — download and re-run it to sync.</span>
+              </>
+            )}
+          </div>
           <Button variant="outline" className="w-full justify-start" onClick={handleDownloadScript}>
             <Download className="mr-2 h-4 w-4" /> Download blocker script (flowstate-block.sh)
           </Button>
           {schedule.enabled && (
             <>
+              {!scheduleInSync && (
+                <div className="flex items-center gap-2 rounded-lg border border-flow-yellow/30 bg-flow-yellow/[0.06] px-3 py-2 text-xs text-flow-yellow">
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                  <span>Schedule changed since you last downloaded the plist files — re-download and reload them.</span>
+                </div>
+              )}
               <Button variant="outline" className="w-full justify-start" onClick={handleDownloadOnPlist}>
                 <Download className="mr-2 h-4 w-4" /> Download ON schedule (com.flowstate.blocker.on.plist)
               </Button>
@@ -218,7 +263,26 @@ export function BlockerSection() {
                   <li className="text-xs">To stop the schedule later: <code className="rounded bg-background px-1 py-0.5">sudo launchctl unload /Library/LaunchDaemons/com.flowstate.blocker.on.plist</code> and <code className="rounded bg-background px-1 py-0.5">sudo launchctl unload /Library/LaunchDaemons/com.flowstate.blocker.off.plist</code></li>
                 </>
               )}
-              <li>Changed your domain list? Re-download the script and repeat step 1 — it overwrites the old one.</li>
+              <li>
+                Changed your domain list? Re-download the script, repeat step 1 to overwrite the old one, then run{" "}
+                <code className="rounded bg-background px-1 py-0.5">sudo {SCRIPT_PATH} on</code> again — it
+                automatically syncs to the new list even if blocking is already on.
+              </li>
+              {schedule.enabled && (
+                <li>
+                  Changed the schedule? <code className="rounded bg-background px-1 py-0.5">launchctl load</code>{" "}
+                  on an already-loaded plist is a no-op — you must unload the old one before loading the new file,
+                  or the old times keep running:{" "}
+                  <code className="rounded bg-background px-1 py-0.5">
+                    sudo launchctl unload /Library/LaunchDaemons/com.flowstate.blocker.on.plist
+                  </code>{" "}
+                  and{" "}
+                  <code className="rounded bg-background px-1 py-0.5">
+                    sudo launchctl unload /Library/LaunchDaemons/com.flowstate.blocker.off.plist
+                  </code>
+                  , then repeat the copy + load steps above with the freshly downloaded files.
+                </li>
+              )}
             </ol>
           </details>
         </div>

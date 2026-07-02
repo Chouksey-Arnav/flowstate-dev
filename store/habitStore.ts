@@ -4,12 +4,14 @@ import type { Habit, HabitCategory } from "@/types";
 import { generateId } from "@/lib/id";
 import { getNextOrder } from "@/lib/habits";
 import { toDateKey } from "@/lib/dates";
+import { HABIT_CHECKIN_XP } from "@/lib/xp";
+import { useXpStore } from "./xpStore";
 
 interface HabitState {
   habits: Habit[];
   hasHydrated: boolean;
   setHasHydrated: (value: boolean) => void;
-  addHabit: (input: { name: string; icon: string; category: HabitCategory }) => Habit;
+  addHabit: (input: { name: string; icon: string; category: HabitCategory; timesPerWeek?: number }) => Habit;
   updateHabit: (id: string, updates: Partial<Habit>) => void;
   deleteHabit: (id: string) => void;
   toggleCompletion: (id: string, dateKey?: string) => void;
@@ -32,6 +34,7 @@ export const useHabitStore = create<HabitState>()(
           icon: input.icon,
           category: input.category,
           completions: [],
+          timesPerWeek: input.timesPerWeek ?? 7,
           order: getNextOrder(get().habits),
           createdAt: new Date().toISOString(),
         };
@@ -47,7 +50,9 @@ export const useHabitStore = create<HabitState>()(
       deleteHabit: (id) =>
         set((state) => ({ habits: state.habits.filter((h) => h.id !== id) })),
 
-      toggleCompletion: (id, dateKey = toDateKey()) =>
+      toggleCompletion: (id, dateKey = toDateKey()) => {
+        const habit = get().habits.find((h) => h.id === id);
+        const wasCompleted = habit?.completions.includes(dateKey) ?? false;
         set((state) => ({
           habits: state.habits.map((h) => {
             if (h.id !== id) return h;
@@ -59,7 +64,11 @@ export const useHabitStore = create<HabitState>()(
                 : [...h.completions, dateKey],
             };
           }),
-        })),
+        }));
+        if (habit && !wasCompleted) {
+          useXpStore.getState().awardXp(HABIT_CHECKIN_XP, "habit", `${habit.name} checked in`);
+        }
+      },
 
       reorderAll: (habits) => set({ habits }),
 
@@ -70,6 +79,15 @@ export const useHabitStore = create<HabitState>()(
     }),
     {
       name: "flowstate-habits",
+      version: 1,
+      migrate: (persistedState) => {
+        const state = persistedState as { habits?: Partial<Habit>[] };
+        const habits: Habit[] = (state.habits ?? []).map((h) => ({
+          timesPerWeek: 7,
+          ...h,
+        })) as Habit[];
+        return { ...state, habits };
+      },
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

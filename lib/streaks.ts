@@ -18,6 +18,32 @@ export function calculateTaskStreak(tasks: Task[], today: Date = new Date()): St
   return calculateStreakFromDateSet(getCompletedDateKeys(tasks), today);
 }
 
+/** How many tasks were completed on each date, keyed by local date key. */
+export function getDailyCompletionCounts(tasks: Task[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const t of tasks) {
+    if (!t.completedAt) continue;
+    const key = toDateKey(new Date(t.completedAt));
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return counts;
+}
+
+/**
+ * The real streak: only days where you hit your daily task goal count,
+ * not just "did something." This is what should drive streak UI and warnings.
+ */
+export function calculateGoalStreak(tasks: Task[], dailyGoal: number, today: Date = new Date()): Streak {
+  if (dailyGoal <= 0) return calculateTaskStreak(tasks, today);
+  const counts = getDailyCompletionCounts(tasks);
+  const metDays = new Set(
+    Array.from(counts.entries())
+      .filter(([, count]) => count >= dailyGoal)
+      .map(([key]) => key)
+  );
+  return calculateStreakFromDateSet(metDays, today);
+}
+
 /**
  * Streak doesn't break just because today is incomplete — only after a full
  * day passes with nothing done. So the walk-back starts at today if present,

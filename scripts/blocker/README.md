@@ -76,8 +76,9 @@ sudo launchctl unload /Library/LaunchDaemons/com.flowstate.blocker.off.plist
 - Check that both plist files exist: `ls ~/Downloads/com.flowstate.blocker.*.plist`
 - Verify `/Library/LaunchDaemons/` is writable: `sudo ls -ld /Library/LaunchDaemons/` should show `rwx` for owner
 
-**"Already blocking. Run '$0 off' first..."**
-- The blocker is already on. Run `sudo /usr/local/bin/flowstate-block.sh off` to disable it, then try again
+**Changed your domain list after already turning blocking on?**
+- Re-run `sudo flowstate-block.sh on` with the freshly updated script in place — it automatically replaces the old
+  blocklist with the new one, no need to run `off` first.
 
 **"Cannot write to /etc/hosts. Did you use 'sudo'?"**
 - Always prefix with `sudo`: `sudo /usr/local/bin/flowstate-block.sh on`
@@ -86,6 +87,17 @@ sudo launchctl unload /Library/LaunchDaemons/com.flowstate.blocker.off.plist
 - Verify the plist file syntax: `plutil -lint /Library/LaunchDaemons/com.flowstate.blocker.on.plist`
 - Check the script path in the plist points to `/usr/local/bin/flowstate-block.sh`
 - Ensure the script is executable: `sudo chmod +x /usr/local/bin/flowstate-block.sh`
+
+**Changed the schedule but the old times are still running?**
+- `launchctl load` on an already-loaded label is a no-op, so overwriting the plist file alone does nothing. Unload
+  the old job first, then load the new file:
+  ```bash
+  sudo launchctl unload /Library/LaunchDaemons/com.flowstate.blocker.on.plist
+  sudo launchctl unload /Library/LaunchDaemons/com.flowstate.blocker.off.plist
+  # copy the freshly downloaded plists over, then:
+  sudo launchctl load /Library/LaunchDaemons/com.flowstate.blocker.on.plist
+  sudo launchctl load /Library/LaunchDaemons/com.flowstate.blocker.off.plist
+  ```
 
 **Debugging mode**
 - Run with debug output: `DEBUG=1 sudo /usr/local/bin/flowstate-block.sh on`

@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { FocusSession, FocusSessionType } from "@/types";
 import { generateId } from "@/lib/id";
+import { xpForFocusSession } from "@/lib/xp";
+import { useXpStore } from "./xpStore";
 
 interface FocusState {
   sessions: FocusSession[];
@@ -35,6 +37,11 @@ export const useFocusStore = create<FocusState>()(
           endedAt: input.endedAt,
         };
         set((state) => ({ sessions: [...state.sessions, session] }));
+        useXpStore.getState().awardXp(
+          xpForFocusSession(session.durationMinutes),
+          "focus",
+          `${session.durationMinutes}-minute focus session`
+        );
         return session;
       },
 

@@ -10,7 +10,7 @@ import { CategoryDonut } from "@/components/stats/category-donut";
 import { WeeklyBarChart } from "@/components/stats/weekly-bar-chart";
 import { Heatmap } from "@/components/stats/heatmap";
 import { getCompletedTasks } from "@/lib/tasks";
-import { calculateTaskStreak } from "@/lib/streaks";
+import { calculateGoalStreak } from "@/lib/streaks";
 import {
   getTotalFocusMinutes,
   getHabitCompletionRate,
@@ -23,9 +23,10 @@ export default function StatsPage() {
   const habits = useHabitStore((s) => s.habits);
   const sessions = useFocusStore((s) => s.sessions);
   const firstDayOfWeek = useSettingsStore((s) => s.firstDayOfWeek);
+  const dailyTaskGoal = useSettingsStore((s) => s.dailyTaskGoal);
 
   const completedTasks = getCompletedTasks(tasks);
-  const streak = calculateTaskStreak(tasks);
+  const streak = calculateGoalStreak(tasks, dailyTaskGoal);
   const totalFocusMinutes = getTotalFocusMinutes(sessions);
   const habitRate = getHabitCompletionRate(habits, 30);
   const categoryBreakdown = getCategoryBreakdown(tasks);
