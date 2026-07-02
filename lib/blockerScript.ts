@@ -51,10 +51,21 @@ flush_dns() {
   fi
 }
 
-block_on() {
+strip_block() {
   if grep -q "$MARKER_START" "$HOSTS_FILE" 2>/dev/null; then
-    echo "Already blocking. Run '$0 off' first to change the list."
-    exit 0
+    sed -i.flowstate.bak "/$MARKER_START/,/$MARKER_END/d" "$HOSTS_FILE"
+    rm -f "$HOSTS_FILE.flowstate.bak"
+  fi
+}
+
+block_on() {
+  # Re-running 'on' always syncs to the domain list baked into this script —
+  # it never silently no-ops just because a block was already present, so
+  # re-downloading after changing your blocklist in the app "just works."
+  local was_blocking=0
+  if grep -q "$MARKER_START" "$HOSTS_FILE" 2>/dev/null; then
+    was_blocking=1
+    strip_block
   fi
   {
     echo "$MARKER_START"
@@ -65,7 +76,11 @@ block_on() {
     echo "$MARKER_END"
   } >> "$HOSTS_FILE"
   flush_dns
-  echo "Blocking \${#DOMAINS[@]} domain(s): \${DOMAINS[*]}"
+  if [ "$was_blocking" = "1" ]; then
+    echo "Blocklist updated. Now blocking \${#DOMAINS[@]} domain(s): \${DOMAINS[*]}"
+  else
+    echo "Blocking \${#DOMAINS[@]} domain(s): \${DOMAINS[*]}"
+  fi
 }
 
 block_off() {
@@ -73,8 +88,7 @@ block_off() {
     echo "Not currently blocking."
     exit 0
   fi
-  sed -i.flowstate.bak "/$MARKER_START/,/$MARKER_END/d" "$HOSTS_FILE"
-  rm -f "$HOSTS_FILE.flowstate.bak"
+  strip_block
   flush_dns
   echo "Blocking removed."
 }
@@ -176,6 +190,17 @@ ${intervalsFor(schedule.endTime, schedule.days)}
 </dict>
 </plist>
 `;
+}
+
+/** A stable fingerprint of just the domain list, so the UI can tell you when the downloaded script drifts out of sync — separate from the schedule so editing one doesn't falsely flag the other as stale. */
+export function getSitesFingerprint(sites: BlockedSite[]): string {
+  const domains = [...new Set(sites.map((s) => s.domain))].sort();
+  return JSON.stringify(domains);
+}
+
+/** A stable fingerprint of just the schedule, for the plist download sync indicator. */
+export function getScheduleFingerprint(schedule: BlockerSchedule): string {
+  return JSON.stringify(schedule);
 }
 
 export function downloadTextFile(filename: string, contents: string) {

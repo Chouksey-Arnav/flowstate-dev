@@ -64,6 +64,7 @@ export default function HabitsPage() {
           habits={sorted}
           weekDates={weekDates}
           weekdayLabels={weekdayLabels}
+          firstDayOfWeek={firstDayOfWeek}
           onToggleDay={toggleCompletion}
           onEdit={(habit) => {
             setEditingHabit(habit);

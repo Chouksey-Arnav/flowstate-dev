@@ -78,11 +78,22 @@ const config: Config = {
           "0%, 100%": { transform: "scale(1) rotate(0deg)" },
           "50%": { transform: "scale(1.06) rotate(-2deg)" },
         },
+        "pulse-slow": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.82" },
+        },
+        "level-up-pop": {
+          "0%": { transform: "scale(0.85)", opacity: "0" },
+          "60%": { transform: "scale(1.05)", opacity: "1" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "flame-flicker": "flame-flicker 2.2s ease-in-out infinite",
+        "pulse-slow": "pulse-slow 2.4s ease-in-out infinite",
+        "level-up-pop": "level-up-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
       },
     },
   },

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTaskStore } from "@/store/taskStore";
+import { XpBar } from "@/components/gamification/xp-bar";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -79,6 +80,10 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      <div className="border-t border-border/60">
+        <XpBar collapsed={collapsed} />
+      </div>
 
       <button
         onClick={() => setCollapsed((c) => !c)}

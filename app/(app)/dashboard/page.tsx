@@ -8,6 +8,8 @@ import { Greeting } from "@/components/dashboard/greeting";
 import { DateCounter } from "@/components/dashboard/date-counter";
 import { StreakCard } from "@/components/dashboard/streak-card";
 import { DailyGoalEditable } from "@/components/dashboard/daily-goal-editable";
+import { GoalProgressCard } from "@/components/dashboard/goal-progress-card";
+import { StreakWarningBanner } from "@/components/dashboard/streak-warning-banner";
 import { TopTasksCard } from "@/components/dashboard/top-tasks-card";
 import { PomodoroMiniWidget } from "@/components/dashboard/pomodoro-mini-widget";
 import { MotivationalQuote } from "@/components/dashboard/motivational-quote";
@@ -19,10 +21,12 @@ import { HabitStatusRow } from "@/components/dashboard/habit-status-row";
 import { WeeklyChartMini } from "@/components/dashboard/weekly-chart-mini";
 import { QuickAddButton } from "@/components/dashboard/quick-add-button";
 import { getTopTasks, getActiveTasks, getAvoidedTasks } from "@/lib/tasks";
-import { calculateTaskStreak } from "@/lib/streaks";
+import { calculateGoalStreak } from "@/lib/streaks";
+import { getGoalStatus } from "@/lib/dailyGoal";
 import { getWeeklySeries } from "@/lib/stats";
 import { getDashboardQuote } from "@/lib/quotes";
 import { toDateKey } from "@/lib/dates";
+import { useNowTick } from "@/hooks/useNowTick";
 
 export default function DashboardPage() {
   const tasks = useTaskStore((s) => s.tasks);
@@ -30,6 +34,7 @@ export default function DashboardPage() {
   const habits = useHabitStore((s) => s.habits);
   const reflectionEntries = useReflectionStore((s) => s.entries);
   const dailyGoal = useSettingsStore((s) => s.dailyGoal);
+  const dailyTaskGoal = useSettingsStore((s) => s.dailyTaskGoal);
   const name = useSettingsStore((s) => s.name);
   const firstDayOfWeek = useSettingsStore((s) => s.firstDayOfWeek);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
@@ -37,10 +42,12 @@ export default function DashboardPage() {
   const commitDate = useSettingsStore((s) => s.commitDate);
   const setCommitment = useSettingsStore((s) => s.setCommitment);
 
+  const now = useNowTick();
+
   const activeTasks = getActiveTasks(tasks);
   const topTasks = getTopTasks(tasks, 3);
   const avoidedTasks = getAvoidedTasks(tasks, 3);
-  const streak = calculateTaskStreak(tasks);
+  const streak = calculateGoalStreak(tasks, dailyTaskGoal, now);
   const weeklySeries = getWeeklySeries(tasks, firstDayOfWeek);
 
   const todayKey = toDateKey();
@@ -48,12 +55,13 @@ export default function DashboardPage() {
     (t) => t.completedAt && toDateKey(new Date(t.completedAt)) === todayKey
   ).length;
   const totalToday = activeTasks.length + completedToday;
+  const goalStatus = getGoalStatus(completedToday, dailyTaskGoal, now);
 
   const isCommittedToday = commitDate === todayKey && !!commitTaskId;
   const committedTask = tasks.find((t) => t.id === commitTaskId);
   const isCompletedToday = committedTask?.status === "completed";
 
-  const streakAtRisk = streak.current > 0 && completedToday === 0 && new Date().getHours() >= 15;
+  const streakAtRisk = streak.current > 0 && (goalStatus.tier === "warning" || goalStatus.tier === "critical");
   const quote = getDashboardQuote({ hasAvoidedTask: avoidedTasks.length > 0, streakAtRisk });
 
   return (
@@ -67,6 +75,13 @@ export default function DashboardPage() {
       </div>
 
       <MotivationalQuote quote={quote} intense={avoidedTasks.length > 0 || streakAtRisk} />
+
+      <StreakWarningBanner
+        tier={goalStatus.tier}
+        tasksRemaining={goalStatus.tasksRemaining}
+        hoursRemaining={goalStatus.hoursRemaining}
+        streak={streak.current}
+      />
 
       <CommitmentCard
         activeTasks={activeTasks}
@@ -83,13 +98,20 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StreakCard current={streak.current} best={streak.best} />
-        <DailyGoalEditable goal={dailyGoal} onSave={(goal) => updateSettings({ dailyGoal: goal })} />
+        <GoalProgressCard
+          completedToday={completedToday}
+          goal={dailyTaskGoal}
+          tier={goalStatus.tier}
+          onChangeGoal={(goal) => updateSettings({ dailyTaskGoal: goal })}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <TodayProgressCard completedToday={completedToday} totalToday={totalToday} />
         <PomodoroMiniWidget />
       </div>
+
+      <DailyGoalEditable goal={dailyGoal} onSave={(goal) => updateSettings({ dailyGoal: goal })} />
 
       <TopTasksCard tasks={topTasks} onComplete={completeTask} />
 

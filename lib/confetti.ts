@@ -11,3 +11,9 @@ export function fireTaskCompleteConfetti(): void {
     disableForReducedMotion: true,
   });
 }
+
+export function fireLevelUpConfetti(): void {
+  const shared = { colors: FLOW_COLORS, disableForReducedMotion: true };
+  confetti({ ...shared, particleCount: 100, spread: 100, angle: 60, origin: { x: 0, y: 0.6 } });
+  confetti({ ...shared, particleCount: 100, spread: 100, angle: 120, origin: { x: 1, y: 0.6 } });
+}

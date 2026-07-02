@@ -21,7 +21,7 @@ import { useReflectionStore } from "@/store/reflectionStore";
 import { getActiveTasks, filterTasks, sortTasks, reorderTasks, getFocusPick } from "@/lib/tasks";
 import { fireTaskCompleteConfetti } from "@/lib/confetti";
 import { playCompletionChime } from "@/lib/audio";
-import { calculateTaskStreak } from "@/lib/streaks";
+import { calculateGoalStreak } from "@/lib/streaks";
 import { toDateKey } from "@/lib/dates";
 import { getRandomCompletionLine } from "@/lib/quotes";
 import type { Task, TaskFilters, SortBy } from "@/types";
@@ -39,6 +39,7 @@ export default function TasksPage() {
 
   const soundEnabled = useSettingsStore((s) => s.soundEnabled);
   const confettiEnabled = useSettingsStore((s) => s.confettiEnabled);
+  const dailyTaskGoal = useSettingsStore((s) => s.dailyTaskGoal);
   const addReflection = useReflectionStore((s) => s.addEntry);
 
   const [filters, setFilters] = useState<TaskFilters>({});
@@ -63,7 +64,7 @@ export default function TasksPage() {
     (t) => t.completedAt && toDateKey(new Date(t.completedAt)) === todayKey
   ).length;
   const totalToday = activeTasks.length + completedToday;
-  const streak = calculateTaskStreak(tasks).current;
+  const streak = calculateGoalStreak(tasks, dailyTaskGoal).current;
 
   function handleComplete(id: string) {
     completeTask(id);

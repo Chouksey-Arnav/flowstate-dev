@@ -43,6 +43,8 @@ export interface Habit {
   icon: string;
   category: HabitCategory;
   completions: string[]; // local date keys, YYYY-MM-DD
+  /** How many days per week this habit is expected — 7 means every day. */
+  timesPerWeek: number;
   order: number;
   createdAt: string;
 }
@@ -65,6 +67,8 @@ export type FirstDayOfWeek = "sunday" | "monday";
 export interface Settings {
   name: string;
   dailyGoal: string;
+  /** Number of tasks you need to complete today to keep your streak alive. */
+  dailyTaskGoal: number;
   pomodoroWork: number; // minutes
   pomodoroBreak: number;
   pomodoroLongBreak: number;
@@ -121,4 +125,14 @@ export interface BlockerSchedule {
   startTime: string; // "09:00"
   endTime: string; // "17:00"
   days: number[]; // 0 (Sun) - 6 (Sat)
+}
+
+export type XpSource = "task" | "habit" | "focus" | "dailyGoal";
+
+export interface XpEvent {
+  id: string;
+  source: XpSource;
+  amount: number;
+  label: string;
+  at: string; // ISO
 }

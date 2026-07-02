@@ -11,13 +11,14 @@ import {
 import { WeeklyGrid } from "./weekly-grid";
 import { StreakFlame } from "./streak-flame";
 import { getHabitIcon } from "@/lib/habit-icons";
-import { calculateHabitStreak } from "@/lib/habits";
-import type { Habit } from "@/types";
+import { calculateHabitStreak, calculateHabitWeekStreak, getWeekProgress } from "@/lib/habits";
+import type { FirstDayOfWeek, Habit } from "@/types";
 
 interface HabitItemProps {
   habit: Habit;
   weekDates: Date[];
   weekdayLabels: string[];
+  firstDayOfWeek: FirstDayOfWeek;
   draggable?: boolean;
   onToggleDay: (dateKey: string) => void;
   onEdit: () => void;
@@ -33,6 +34,7 @@ export function HabitItem({
   habit,
   weekDates,
   weekdayLabels,
+  firstDayOfWeek,
   draggable,
   onToggleDay,
   onEdit,
@@ -40,7 +42,11 @@ export function HabitItem({
   dragHandlers,
 }: HabitItemProps) {
   const Icon = getHabitIcon(habit.icon);
-  const { current } = calculateHabitStreak(habit);
+  const isDaily = (habit.timesPerWeek ?? 7) >= 7;
+  const { current } = isDaily
+    ? calculateHabitStreak(habit)
+    : calculateHabitWeekStreak(habit, firstDayOfWeek);
+  const weekProgress = getWeekProgress(habit, firstDayOfWeek);
 
   return (
     <div
@@ -57,7 +63,14 @@ export function HabitItem({
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-foreground">{habit.name}</p>
-          <p className="text-xs text-muted-foreground">{habit.category}</p>
+          <p className="text-xs text-muted-foreground">
+            {habit.category}
+            {!isDaily && (
+              <span className={weekProgress.met ? "ml-1.5 text-flow-green" : "ml-1.5"}>
+                · {weekProgress.completed}/{weekProgress.target} this week
+              </span>
+            )}
+          </p>
         </div>
         <StreakFlame streak={current} />
         <DropdownMenu>

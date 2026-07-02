@@ -38,6 +38,13 @@ flush_dns() {
   fi
 }
 
+strip_block() {
+  if grep -q "$MARKER_START" "$HOSTS_FILE" 2>/dev/null; then
+    sed -i.flowstate.bak "/$MARKER_START/,/$MARKER_END/d" "$HOSTS_FILE" || { echo "Error: Failed to edit $HOSTS_FILE" >&2; exit 1; }
+    rm -f "$HOSTS_FILE.flowstate.bak"
+  fi
+}
+
 block_on() {
   if [ ! -f "$HOSTS_FILE" ]; then
     echo "Error: $HOSTS_FILE not found. Are you on macOS or Linux?" >&2
@@ -49,10 +56,14 @@ block_on() {
     exit 1
   fi
 
+  # Re-running 'on' always syncs to the DOMAINS baked into this script —
+  # it never silently no-ops just because a block was already present, so
+  # re-downloading after changing your blocklist in the app "just works."
+  local was_blocking=0
   if grep -q "$MARKER_START" "$HOSTS_FILE" 2>/dev/null; then
-    echo "Already blocking. Run '$0 off' first to change the list."
-    exit 0
+    was_blocking=1
   fi
+  strip_block
 
   if [ "$DEBUG" = "1" ]; then
     echo "[DEBUG] Adding $(( ${#DOMAINS[@]} * 2 )) lines to $HOSTS_FILE"
@@ -68,7 +79,11 @@ block_on() {
   } >> "$HOSTS_FILE" || { echo "Error: Failed to write to $HOSTS_FILE" >&2; exit 1; }
 
   flush_dns
-  echo "✓ Blocking ${#DOMAINS[@]} domain(s): ${DOMAINS[*]}"
+  if [ "$was_blocking" = "1" ]; then
+    echo "✓ Blocklist updated. Now blocking ${#DOMAINS[@]} domain(s): ${DOMAINS[*]}"
+  else
+    echo "✓ Blocking ${#DOMAINS[@]} domain(s): ${DOMAINS[*]}"
+  fi
 }
 
 block_off() {
@@ -86,8 +101,7 @@ block_off() {
     echo "[DEBUG] Removing flowstate block from $HOSTS_FILE"
   fi
 
-  sed -i.flowstate.bak "/$MARKER_START/,/$MARKER_END/d" "$HOSTS_FILE" || { echo "Error: Failed to edit $HOSTS_FILE" >&2; exit 1; }
-  rm -f "$HOSTS_FILE.flowstate.bak"
+  strip_block
   flush_dns
   echo "✓ Blocking removed."
 }
