@@ -146,7 +146,7 @@ export default function TasksPage() {
 
           <BrainDumpInput />
 
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <TaskFiltersBar filters={filters} onChange={setFilters} />
             <SortControl value={sortBy} onChange={setSortBy} />
           </div>

@@ -1,4 +1,6 @@
+import { Flame } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { getHabitIcon } from "@/lib/habit-icons";
 import { isCompletedToday } from "@/lib/habits";
 import { cn } from "@/lib/utils";
@@ -14,7 +16,15 @@ export function HabitStatusRow({ habits }: HabitStatusRowProps) {
       <CardHeader>
         <CardTitle>Today&apos;s habits</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-wrap gap-3">
+      <CardContent className={habits.length === 0 ? undefined : "flex flex-wrap gap-3"}>
+        {habits.length === 0 && (
+          <EmptyState
+            icon={Flame}
+            title="No habits yet"
+            description="Add one to start tracking your streak."
+            className="py-8"
+          />
+        )}
         {habits.map((habit) => {
           const Icon = getHabitIcon(habit.icon);
           const done = isCompletedToday(habit);

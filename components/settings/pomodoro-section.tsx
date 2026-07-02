@@ -28,7 +28,9 @@ export function PomodoroSection() {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-3 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="pomodoro-work">Work (min)</Label>
+            <Label htmlFor="pomodoro-work" className="whitespace-nowrap">
+              Work
+            </Label>
             <Input
               id="pomodoro-work"
               type="number"
@@ -39,7 +41,9 @@ export function PomodoroSection() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="pomodoro-break">Break (min)</Label>
+            <Label htmlFor="pomodoro-break" className="whitespace-nowrap">
+              Break
+            </Label>
             <Input
               id="pomodoro-break"
               type="number"
@@ -50,7 +54,9 @@ export function PomodoroSection() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="pomodoro-long-break">Long break (min)</Label>
+            <Label htmlFor="pomodoro-long-break" className="whitespace-nowrap">
+              Long break
+            </Label>
             <Input
               id="pomodoro-long-break"
               type="number"
@@ -61,6 +67,7 @@ export function PomodoroSection() {
             />
           </div>
         </div>
+        <p className="text-xs text-muted-foreground">All durations are in minutes.</p>
         <div className="space-y-1.5">
           <Label>Timer sound</Label>
           <Select

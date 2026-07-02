@@ -24,12 +24,12 @@ export function TaskFiltersBar({ filters, onChange }: TaskFiltersBarProps) {
   const hasFilters = filters.category || filters.priority || filters.difficulty;
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <Select
         value={filters.category ?? "all"}
         onValueChange={(v) => onChange({ ...filters, category: v === "all" ? undefined : (v as Category) })}
       >
-        <SelectTrigger className="h-9 w-[150px]">
+        <SelectTrigger className="h-9 w-[calc(50%-0.25rem)] sm:w-[150px]">
           <SelectValue placeholder="Category" />
         </SelectTrigger>
         <SelectContent>
@@ -46,7 +46,7 @@ export function TaskFiltersBar({ filters, onChange }: TaskFiltersBarProps) {
         value={filters.priority ?? "all"}
         onValueChange={(v) => onChange({ ...filters, priority: v === "all" ? undefined : (v as Priority) })}
       >
-        <SelectTrigger className="h-9 w-[130px]">
+        <SelectTrigger className="h-9 w-[calc(50%-0.25rem)] sm:w-[130px]">
           <SelectValue placeholder="Priority" />
         </SelectTrigger>
         <SelectContent>
@@ -63,7 +63,7 @@ export function TaskFiltersBar({ filters, onChange }: TaskFiltersBarProps) {
         value={filters.difficulty ?? "all"}
         onValueChange={(v) => onChange({ ...filters, difficulty: v === "all" ? undefined : (v as Difficulty) })}
       >
-        <SelectTrigger className="h-9 w-[140px]">
+        <SelectTrigger className="h-9 w-[calc(50%-0.25rem)] sm:w-[140px]">
           <SelectValue placeholder="Difficulty" />
         </SelectTrigger>
         <SelectContent>
