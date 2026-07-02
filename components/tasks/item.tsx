@@ -98,14 +98,16 @@ export function TaskItem({
           <Checkbox
             checked={selected}
             onCheckedChange={(v) => onSelectChange(Boolean(v))}
-            className="mt-1"
+            title="Select for bulk actions"
+            className="mt-1 rounded-[3px] border-muted-foreground/40"
           />
         )}
         <Checkbox
           checked={completed}
           onCheckedChange={() => (completed ? onUncomplete() : onComplete())}
+          title={completed ? "Mark incomplete" : "Mark complete"}
           className={cn(
-            "mt-1 transition-transform",
+            "mt-1 rounded-full transition-transform",
             completed && "border-flow-green bg-flow-green text-primary-foreground"
           )}
         />

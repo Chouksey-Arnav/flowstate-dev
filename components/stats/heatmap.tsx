@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getMonthHeatmap } from "@/lib/stats";
+import { toDateKey } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/types";
 
@@ -24,6 +25,7 @@ export function Heatmap({ tasks }: HeatmapProps) {
   const [monthDate, setMonthDate] = useState(() => startOfMonth(new Date()));
   const days = getMonthHeatmap(tasks, monthDate);
   const leadingBlanks = getDay(monthDate); // 0 = Sunday
+  const todayKey = toDateKey();
 
   return (
     <Card>
@@ -45,7 +47,11 @@ export function Heatmap({ tasks }: HeatmapProps) {
             <div
               key={day.dateKey}
               title={`${day.dateKey}: ${day.count} completed`}
-              className={cn("flex aspect-square items-center justify-center rounded-sm text-[10px] text-foreground/70", intensityClass(day.count))}
+              className={cn(
+                "flex aspect-square items-center justify-center rounded-sm text-[10px] text-foreground/70",
+                intensityClass(day.count),
+                day.dateKey === todayKey && "ring-1 ring-inset ring-primary"
+              )}
             >
               {Number(day.dateKey.slice(-2))}
             </div>
