@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { GripVertical, MoreVertical, Pencil, Archive, ArchiveRestore, Trash2, Clock, Zap, Check, Timer } from "lucide-react";
+import { GripVertical, MoreVertical, Pencil, Archive, ArchiveRestore, Trash2, Clock, Zap, Check, Timer, Target, Sparkles } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +21,10 @@ import { cn } from "@/lib/utils";
 import { formatDisplayDate } from "@/lib/dates";
 import { isOverdue } from "@/lib/overdue";
 import { getAvoidanceScore, daysSinceCreated, AVOIDANCE_THRESHOLD } from "@/lib/tasks";
+import { xpForTask } from "@/lib/xp";
+import { toDateKey } from "@/lib/dates";
 import { usePomodoroStore } from "@/store/pomodoroStore";
+import { useSettingsStore } from "@/store/settingsStore";
 import type { Task } from "@/types";
 
 interface TaskItemProps {
@@ -60,12 +63,17 @@ export function TaskItem({
   const [expanded, setExpanded] = useState(false);
   const router = useRouter();
   const setPomodoroTaskId = usePomodoroStore((s) => s.setTaskId);
+  const setCommitment = useSettingsStore((s) => s.setCommitment);
+  const commitTaskId = useSettingsStore((s) => s.commitTaskId);
+  const commitDate = useSettingsStore((s) => s.commitDate);
   const completed = task.status === "completed";
   const archived = task.status === "archived";
   const overdue = isOverdue(task);
   const subtaskDone = task.subtasks.filter((s) => s.completed).length;
   const quickWin = !completed && !!task.estimatedMinutes && task.estimatedMinutes <= 15;
   const avoided = !completed && !archived && getAvoidanceScore(task) >= AVOIDANCE_THRESHOLD;
+  const taskXp = xpForTask(task);
+  const isTodaysFocus = commitTaskId === task.id && commitDate === toDateKey();
 
   const PRIORITY_ACCENT: Record<string, string> = {
     HIGH: "border-l-flow-red",
@@ -125,6 +133,14 @@ export function TaskItem({
             <DifficultyBadge difficulty={task.difficulty} />
             {overdue && <OverdueBadge />}
             {avoided && <AvoidedBadge days={daysSinceCreated(task)} />}
+            {isTodaysFocus && !completed && (
+              <span className="flex items-center gap-1 rounded-full border border-flow-red/30 bg-flow-red/10 px-2 py-0.5 text-xs font-medium text-flow-red">
+                <Target className="h-3 w-3" /> Today&apos;s focus
+              </span>
+            )}
+            <span className="flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-xs font-semibold tabular-nums text-primary">
+              <Sparkles className="h-3 w-3" /> {taskXp} XP
+            </span>
             {quickWin && (
               <span className="flex items-center gap-1 rounded-full border border-flow-blue/30 bg-flow-blue/10 px-2 py-0.5 text-xs font-medium text-flow-blue">
                 <Zap className="h-3 w-3" /> Quick win
@@ -183,6 +199,11 @@ export function TaskItem({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {!completed && !archived && (
+              <DropdownMenuItem onClick={() => setCommitment(task.id, toDateKey())}>
+                <Target className="mr-2 h-4 w-4" /> {isTodaysFocus ? "Today's focus" : "Do this next"}
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={onEdit}>
               <Pencil className="mr-2 h-4 w-4" /> Edit
             </DropdownMenuItem>

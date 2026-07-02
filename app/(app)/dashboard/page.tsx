@@ -6,6 +6,7 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { useReflectionStore } from "@/store/reflectionStore";
 import { Greeting } from "@/components/dashboard/greeting";
 import { DateCounter } from "@/components/dashboard/date-counter";
+import { LevelHeroCard } from "@/components/dashboard/level-hero-card";
 import { StreakCard } from "@/components/dashboard/streak-card";
 import { DailyGoalEditable } from "@/components/dashboard/daily-goal-editable";
 import { GoalProgressCard } from "@/components/dashboard/goal-progress-card";
@@ -73,6 +74,8 @@ export default function DashboardPage() {
         </div>
         <QuickAddButton />
       </div>
+
+      <LevelHeroCard />
 
       <MotivationalQuote quote={quote} intense={avoidedTasks.length > 0 || streakAtRisk} />
 
