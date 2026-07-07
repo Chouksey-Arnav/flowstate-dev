@@ -39,22 +39,13 @@ export function XpBar({ collapsed }: XpBarProps) {
         </span>
         <span className="text-muted-foreground">{title}</span>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-secondary ring-1 ring-inset ring-white/5">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
         <motion.div
-          className="relative h-full rounded-full bg-gradient-to-r from-primary via-accent to-primary"
+          className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
           initial={false}
-          animate={{
-            width: `${Math.round(progress * 100)}%`,
-            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-          }}
-          transition={{
-            width: { type: "spring", stiffness: 200, damping: 30 },
-            backgroundPosition: { duration: 6, repeat: Infinity, ease: "linear" }
-          }}
-          style={{ backgroundSize: "200% 200%" }}
-        >
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)] animate-shimmer" style={{ width: "50%" }} />
-        </motion.div>
+          animate={{ width: `${Math.round(progress * 100)}%` }}
+          transition={{ type: "spring", stiffness: 200, damping: 30 }}
+        />
       </div>
       <p className="text-right text-[10px] tabular-nums text-muted-foreground">
         {almostThere ? `${xpForNextLevel - xpIntoLevel} XP to level up!` : `${xpIntoLevel}/${xpForNextLevel} XP`}

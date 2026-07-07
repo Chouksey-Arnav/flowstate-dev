@@ -12,8 +12,8 @@ interface GreetingProps {
 export function Greeting({ name }: GreetingProps) {
   const greeting = getGreeting(new Date().getHours());
   return (
-    <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-      {greeting}<span className="text-gradient">{name ? `, ${name}` : ""}</span>
+    <h1 className="text-2xl font-semibold text-foreground">
+      {greeting}{name ? `, ${name}` : ""}
     </h1>
   );
 }
