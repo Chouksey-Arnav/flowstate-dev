@@ -62,43 +62,29 @@ export function CommitmentCard({
 
   if (isCommittedToday && committedTask) {
     return (
-      <div className="relative overflow-hidden rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/20 via-card to-card p-6 shadow-glow animate-pulse-gentle">
+      <div className="relative overflow-hidden rounded-2xl border border-flow-red/30 bg-gradient-to-br from-flow-red/10 via-card to-card p-5 shadow-card">
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-10 -top-12 h-64 w-64 rounded-full bg-primary/20 blur-3xl"
+          className="pointer-events-none absolute -right-10 -top-12 h-48 w-48 rounded-full bg-flow-red/20 blur-3xl"
         />
-        <div className="relative flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-primary">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20">
-              <Lock className="h-3.5 w-3.5" />
-            </div>
-            Today&apos;s One Thing
-          </div>
-          <div className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-tighter text-primary ring-1 ring-inset ring-primary/20">
-            Locked In
-          </div>
+        <div className="relative flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-flow-red">
+          <Lock className="h-3.5 w-3.5" />
+          Today&apos;s One Thing — locked in
         </div>
-        <h2 className="relative mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          {committedTask.title}
-        </h2>
-        <p className="relative mt-2 text-base text-muted-foreground/90">
-          This is your mountain. Everything else is just noise. Focus, finish, and feel the win.
+        <p className="relative mt-2 text-lg font-semibold text-foreground">{committedTask.title}</p>
+        <p className="relative mt-1 text-sm text-muted-foreground">
+          You committed to this today. Nothing else matters until it&apos;s done.
         </p>
-        <div className="relative mt-4 flex flex-wrap items-center gap-2">
+        <div className="relative mt-3 flex flex-wrap items-center gap-1.5">
           <PriorityBadge priority={committedTask.priority} />
           <DifficultyBadge difficulty={committedTask.difficulty} />
-          {committedTask.category && (
-            <span className="rounded-full bg-secondary/50 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-              {committedTask.category}
-            </span>
-          )}
         </div>
-        <div className="relative mt-6 flex flex-wrap gap-3">
-          <Button size="lg" className="h-12 px-8 text-base shadow-glow" onClick={() => startFocus(committedTask.id)}>
-            Enter Flow State <ArrowRight className="ml-2 h-5 w-5" />
+        <div className="relative mt-4 flex flex-wrap gap-2">
+          <Button onClick={() => startFocus(committedTask.id)}>
+            Start a focus session <ArrowRight className="ml-1.5 h-4 w-4" />
           </Button>
-          <Button size="lg" variant="secondary" className="h-12 px-6 text-base" onClick={() => onComplete(committedTask.id)}>
-            <CheckCircle2 className="mr-2 h-5 w-5" /> Mark as Done
+          <Button variant="secondary" onClick={() => onComplete(committedTask.id)}>
+            <CheckCircle2 className="mr-1.5 h-4 w-4" /> Mark done
           </Button>
         </div>
       </div>
