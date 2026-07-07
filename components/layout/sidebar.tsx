@@ -38,11 +38,11 @@ export function Sidebar() {
         collapsed ? "w-16" : "w-60"
       )}
     >
-      <div className={cn("flex items-center gap-2.5 px-4 py-5", collapsed && "justify-center px-0")}>
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-sm font-bold text-primary-foreground shadow-sm shadow-primary/40">
+      <div className={cn("flex items-center gap-2.5 px-4 py-6", collapsed && "justify-center px-0")}>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-accent to-primary text-sm font-black text-primary-foreground shadow-glow ring-1 ring-white/20">
           F
         </div>
-        {!collapsed && <span className="text-sm font-semibold tracking-tight text-gradient">FlowState</span>}
+        {!collapsed && <span className="text-base font-bold tracking-tighter text-gradient">FlowState</span>}
       </div>
 
       <nav className="flex-1 space-y-1 px-2.5">
@@ -54,17 +54,20 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+                "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-300",
                 active
-                  ? "bg-primary/12 text-primary"
+                  ? "bg-primary/10 text-primary shadow-[inset_0_0_12px_rgba(153,102,255,0.05)] ring-1 ring-primary/20"
                   : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground",
                 collapsed && "justify-center px-0"
               )}
             >
               {active && (
-                <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary" />
+                <>
+                  <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary))]" />
+                  <div className="absolute inset-0 bg-primary/5 blur-sm" />
+                </>
               )}
-              <Icon className="h-4 w-4 shrink-0" />
+              <Icon className={cn("h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110", active && "drop-shadow-[0_0_3px_hsl(var(--primary)/0.5)]")} />
               {!collapsed && <span className="flex-1">{item.label}</span>}
               {!collapsed && item.href === "/tasks" && activeTaskCount > 0 && (
                 <span

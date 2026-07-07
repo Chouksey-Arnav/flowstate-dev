@@ -60,6 +60,8 @@ const config: Config = {
       boxShadow: {
         card: "0 1px 2px rgb(0 0 0 / 0.35), 0 10px 30px -16px rgb(0 0 0 / 0.55)",
         "card-hover": "0 1px 2px rgb(0 0 0 / 0.35), 0 16px 40px -16px rgb(0 0 0 / 0.65)",
+        premium: "0 0 0 1px rgba(255, 255, 255, 0.05), 0 1px 1px rgba(0, 0, 0, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 10px 15px -3px rgba(0, 0, 0, 0.4)",
+        glow: "0 0 20px -5px hsl(var(--primary) / 0.3)",
       },
       fontFamily: {
         sans: ["var(--font-geist-sans)"],
@@ -87,13 +89,27 @@ const config: Config = {
           "60%": { transform: "scale(1.05)", opacity: "1" },
           "100%": { transform: "scale(1)", opacity: "1" },
         },
+        "pulse-gentle": {
+          "0%, 100%": { transform: "scale(1)", opacity: "1" },
+          "50%": { transform: "scale(1.02)", opacity: "0.9" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-5px)" },
+        },
+        shimmer: {
+          "100%": { left: "100%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "flame-flicker": "flame-flicker 2.2s ease-in-out infinite",
         "pulse-slow": "pulse-slow 2.4s ease-in-out infinite",
+        "pulse-gentle": "pulse-gentle 3s ease-in-out infinite",
         "level-up-pop": "level-up-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        float: "float 4s ease-in-out infinite",
+        shimmer: "shimmer 2s infinite",
       },
     },
   },
