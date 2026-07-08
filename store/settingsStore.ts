@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { supabaseKvStorage } from "@/lib/supabase/kvStorage";
 import type { Settings } from "@/types";
 
 const DEFAULT_SETTINGS: Settings = {
@@ -39,6 +40,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "flowstate-settings",
+      storage: createJSONStorage(() => supabaseKvStorage),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { supabaseKvStorage } from "@/lib/supabase/kvStorage";
 import type { Task, SubTask, Difficulty } from "@/types";
 import { generateId } from "@/lib/id";
 import { getNextOrder } from "@/lib/tasks";
@@ -160,6 +161,7 @@ export const useTaskStore = create<TaskState>()(
     }),
     {
       name: "flowstate-tasks",
+      storage: createJSONStorage(() => supabaseKvStorage),
       version: 1,
       migrate: (persistedState) => {
         const state = persistedState as { tasks?: Partial<Task>[] };

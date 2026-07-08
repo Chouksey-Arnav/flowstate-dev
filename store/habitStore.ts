@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { supabaseKvStorage } from "@/lib/supabase/kvStorage";
 import type { Habit, HabitCategory } from "@/types";
 import { generateId } from "@/lib/id";
 import { getNextOrder } from "@/lib/habits";
@@ -79,6 +80,7 @@ export const useHabitStore = create<HabitState>()(
     }),
     {
       name: "flowstate-habits",
+      storage: createJSONStorage(() => supabaseKvStorage),
       version: 1,
       migrate: (persistedState) => {
         const state = persistedState as { habits?: Partial<Habit>[] };

@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { supabaseKvStorage } from "@/lib/supabase/kvStorage";
 import type { XpEvent, XpSource } from "@/types";
 import { generateId } from "@/lib/id";
 import { useXpToastStore } from "./xpToastStore";
@@ -41,6 +42,7 @@ export const useXpStore = create<XpState>()(
     }),
     {
       name: "flowstate-xp",
+      storage: createJSONStorage(() => supabaseKvStorage),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
