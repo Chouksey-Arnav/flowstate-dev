@@ -6,15 +6,26 @@ A dark-themed, no-excuses anti-procrastination productivity app. Tasks, a Pomodo
 
 - **Next.js 14** (App Router) + **TypeScript**
 - **Tailwind CSS v3** with hand-written shadcn-style UI primitives (Radix UI under the hood)
-- **Zustand** with `persist` for state, four independent domain stores (tasks, habits, focus sessions, settings)
+- **Zustand** with `persist` for state, seven independent domain stores (tasks, habits, focus sessions, settings, xp, reflections, blocker prefs) — persisted to Supabase instead of localStorage, see below
+- **Supabase** (Postgres + Auth + Edge Functions) for accounts and cross-device sync
 - **Recharts** for the weekly bar chart and category donut
 - **Framer Motion** for page transitions and list animations
 - **Web Audio API** for all timer/completion/ambient sounds — synthesized client-side, no audio files or third-party embeds
 - **canvas-confetti** for task-completion celebrations
 
-## Data storage
+## Accounts & data storage
 
-Everything is stored in your browser's `localStorage` (under `flowstate-tasks`, `flowstate-habits`, `flowstate-focus`, `flowstate-settings`). There is no backend and no account — your data lives on the device you use it on. Use Settings → Export data as JSON to back it up.
+FlowState has real accounts: a username (always displayed with a leading `@`, e.g. `@arnav`) and a password. Usernames are globally unique (case-insensitive) and can be changed any time from Settings → Account. Logging in from any device signs you into that same account and pulls your data — nothing is tied to a single browser or machine.
+
+Under the hood:
+
+- **Auth**: Supabase Auth. Since Supabase's auth system is keyed on email, each account gets an internal, never-shown synthetic email (`<uuid>@flowstate.internal`) that the username maps to — password hashing, sessions, and JWTs are all handled by Supabase.
+- **Signup / login / username change** run through three Supabase Edge Functions (`flowstate-signup`, `flowstate-login`, `flowstate-change-username`) rather than the browser, so the service-role key needed to create accounts and resolve usernames never touches client code.
+- **App data** (tasks, habits, focus sessions, settings, XP, reflections, blocker prefs) is stored in a Postgres table (`flowstate_kv`) as one JSON row per store per account, gated by row-level security so a user can only ever read or write their own rows. Each Zustand store's `persist` middleware points at this table instead of `localStorage`, so the existing store code barely changed.
+- The **live-running Pomodoro timer state** intentionally stays in `localStorage` — it's per-device, per-tab UI state, not account data worth syncing.
+- All of this lives in a `flowstate_`-prefixed schema inside a shared Supabase project, isolated from that project's other, unrelated tables.
+
+Use Settings → Export data as JSON to back up your data locally at any time.
 
 ## Getting started
 
@@ -23,7 +34,14 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — it redirects to `/dashboard`.
+Requires a `.env.local` with:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```
+
+Open [http://localhost:3000](http://localhost:3000) — it redirects to `/login` (or `/dashboard` if already signed in).
 
 Other useful scripts:
 
@@ -40,10 +58,10 @@ npm run build       # production build
 - **Focus** — a drift-free Pomodoro timer (work/break/long-break), an SVG ring display, a session log, a "Watch all" lofi video grid, a distraction-free Full Focus Mode, and ambient sound (lofi/rain/white/brown noise, all synthesized).
 - **Habits** — weekly completion grid, streaks (current + best), a Perfect Day badge, drag-to-reorder, and six pre-loaded defaults.
 - **Stats** — completion/focus-time/habit-rate/streak stat cards, a category donut, a weekly bar chart, and a CSS-grid monthly heatmap with month navigation.
-- **Settings** — profile, Pomodoro durations and timer sound, behavior toggles (confetti, sound, auto-start, first day of week), and data actions (JSON export, clear completed, reset habit streaks, reset everything).
+- **Settings** — account (username, change username, log out), profile, Pomodoro durations and timer sound, behavior toggles (confetti, sound, auto-start, first day of week), and data actions (JSON export, clear completed, reset habit streaks, reset everything).
 
 Responsive down to mobile widths: the sidebar collapses below `md` in favor of a bottom tab bar.
 
 ## Deploying
 
-The app is Vercel-ready as-is — no required environment variables, no server-side dependencies (all state is client-side `localStorage`). Push this repo to Vercel and it will build and deploy with zero configuration.
+Vercel-ready. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as environment variables on the Vercel project (same values as `.env.local`), then push — no other server-side config needed.

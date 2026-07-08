@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { supabaseKvStorage } from "@/lib/supabase/kvStorage";
 import type { ReflectionContext, ReflectionEntry, ReflectionReason } from "@/types";
 import { generateId } from "@/lib/id";
 
@@ -49,6 +50,7 @@ export const useReflectionStore = create<ReflectionState>()(
     }),
     {
       name: "flowstate-reflection",
+      storage: createJSONStorage(() => supabaseKvStorage),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
