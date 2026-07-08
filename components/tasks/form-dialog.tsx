@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Flame, Gauge, Sparkles, Target } from "lucide-react";
+import { Flame, Gauge, Sparkles, Target, Repeat } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -29,8 +29,11 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { generateId } from "@/lib/id";
 import { xpForTaskCompletion, MIN_CUSTOM_XP, MAX_CUSTOM_XP } from "@/lib/xp";
 import { toDateKey } from "@/lib/dates";
+import { addDaysToKey } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 import type { Task, Category, Priority, Difficulty, SubTask } from "@/types";
+
+const MAX_REPEAT_DAYS = 365;
 
 const CATEGORIES: Category[] = ["Business", "CAC/Projects", "Learning", "Personal", "Other"];
 
@@ -69,6 +72,9 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
   const [customXp, setCustomXp] = useState(false);
   const [xpValue, setXpValue] = useState("20");
   const [doNext, setDoNext] = useState(false);
+  const [repeatOn, setRepeatOn] = useState(false);
+  const [repeatStartDate, setRepeatStartDate] = useState(toDateKey());
+  const [repeatDays, setRepeatDays] = useState("7");
 
   useEffect(() => {
     if (open) {
@@ -83,8 +89,21 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
       setCustomXp(typeof task?.xpOverride === "number");
       setXpValue(String(task?.xpOverride ?? xpForTaskCompletion(task?.difficulty ?? "MEDIUM", task?.priority ?? "MEDIUM")));
       setDoNext(false);
+      setRepeatOn(!!task?.schedule);
+      setRepeatStartDate(task?.schedule?.startDate ?? toDateKey());
+      setRepeatDays(String(task?.schedule?.repeatDays ?? 7));
     }
   }, [open, task]);
+
+  const repeatDaysNumber = useMemo(() => {
+    const n = Math.round(Number(repeatDays));
+    if (!Number.isFinite(n)) return 1;
+    return Math.min(MAX_REPEAT_DAYS, Math.max(1, n));
+  }, [repeatDays]);
+  const repeatEndDate = useMemo(
+    () => addDaysToKey(repeatStartDate || toDateKey(), repeatDaysNumber - 1),
+    [repeatStartDate, repeatDaysNumber]
+  );
 
   const computedXp = xpForTaskCompletion(difficulty, priority);
   const previewXp = useMemo(() => {
@@ -102,11 +121,14 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
       category,
       priority,
       difficulty,
-      dueDate: dueDate || undefined,
+      dueDate: repeatOn ? undefined : dueDate || undefined,
       estimatedMinutes: estimatedMinutes ? Number(estimatedMinutes) : undefined,
       subtasks,
       tags: task?.tags ?? [],
       xpOverride: customXp ? previewXp : undefined,
+      schedule: repeatOn
+        ? { startDate: repeatStartDate || toDateKey(), repeatDays: repeatDaysNumber }
+        : undefined,
     };
 
     let savedId = task?.id;
@@ -199,6 +221,49 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
             </Select>
           </div>
 
+          <div className="rounded-xl border border-border/60 bg-secondary/30 p-3.5">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="repeat-toggle" className="flex items-center gap-1.5 text-sm">
+                <Repeat className="h-3.5 w-3.5 text-accent" /> Repeat this task
+              </Label>
+              <Switch id="repeat-toggle" checked={repeatOn} onCheckedChange={setRepeatOn} />
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {repeatOn
+                ? "Appears every day in this window — checking a day off never removes it, uncheck any time."
+                : "Turn on to schedule this task across multiple consecutive days."}
+            </p>
+            {repeatOn && (
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="repeat-start">Start date</Label>
+                  <Input
+                    id="repeat-start"
+                    type="date"
+                    value={repeatStartDate}
+                    onChange={(e) => setRepeatStartDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="repeat-days">Repeat for (days)</Label>
+                  <Input
+                    id="repeat-days"
+                    type="number"
+                    min={1}
+                    max={MAX_REPEAT_DAYS}
+                    value={repeatDays}
+                    onChange={(e) => setRepeatDays(e.target.value)}
+                  />
+                </div>
+                <p className="col-span-2 text-xs text-muted-foreground">
+                  {repeatDaysNumber === 1
+                    ? `Active on ${repeatStartDate || toDateKey()} only.`
+                    : `Active ${repeatStartDate || toDateKey()} through ${repeatEndDate} (${repeatDaysNumber} days).`}
+                </p>
+              </div>
+            )}
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="task-due">Due date</Label>
@@ -207,6 +272,8 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
+                disabled={repeatOn}
+                placeholder={repeatOn ? "Not used for repeating tasks" : undefined}
               />
             </div>
             <div className="space-y-1.5">

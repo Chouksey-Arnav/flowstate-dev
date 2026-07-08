@@ -1,6 +1,6 @@
 import { toDateKey } from "./dates";
 import { isOverdue } from "./overdue";
-import type { Task, TaskFilters, SortBy, Priority, Difficulty } from "@/types";
+import type { Task, TaskFilters, SortBy, Priority, Difficulty, TaskSchedule } from "@/types";
 
 const PRIORITY_ORDER: Record<Priority, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
 const PRIORITY_SCORE: Record<Priority, number> = { HIGH: 300, MEDIUM: 150, LOW: 0 };
@@ -10,6 +10,49 @@ const AVOIDANCE_PRIORITY_WEIGHT: Record<Priority, number> = { HIGH: 18, MEDIUM: 
 
 /** Avoidance score crosses this threshold to be flagged/surfaced as "avoided". */
 export const AVOIDANCE_THRESHOLD = 120;
+
+function keyToDays(key: string): number {
+  return Date.parse(`${key}T00:00:00`) / 86400000;
+}
+
+export function addDaysToKey(key: string, days: number): string {
+  return toDateKey(new Date(Date.parse(`${key}T00:00:00`) + days * 86400000));
+}
+
+/** The last day (inclusive) a schedule's recurrence window covers. */
+export function getScheduleEndKey(schedule: TaskSchedule): string {
+  return addDaysToKey(schedule.startDate, Math.max(1, schedule.repeatDays) - 1);
+}
+
+/** Whether a scheduled task is within its recurrence window on the given day. */
+export function isScheduleActiveOn(schedule: TaskSchedule, dateKey: string): boolean {
+  const offset = keyToDays(dateKey) - keyToDays(schedule.startDate);
+  return offset >= 0 && offset < Math.max(1, schedule.repeatDays);
+}
+
+/** 1-indexed "Day N of M" position within a schedule's window, clamped to the window. */
+export function getScheduleDayLabel(schedule: TaskSchedule, dateKey: string): string {
+  const offset = keyToDays(dateKey) - keyToDays(schedule.startDate);
+  const day = Math.min(Math.max(offset + 1, 1), schedule.repeatDays);
+  return `Day ${day} of ${schedule.repeatDays}`;
+}
+
+/** All the local dates (YYYY-MM-DD) a task counts as "done" on — the single source of truth for streaks/stats. */
+export function completionDateKeys(task: Task): string[] {
+  const keys = new Set(task.completions ?? []);
+  if (task.completedAt) keys.add(toDateKey(new Date(task.completedAt)));
+  return Array.from(keys);
+}
+
+/** Whether a task (scheduled or one-off) was checked off on the given day. */
+export function isTaskCompletedOn(task: Task, dateKey: string): boolean {
+  return completionDateKeys(task).includes(dateKey);
+}
+
+/** Whether a task counts as "done" at all, for stats that don't care which day. */
+export function isTaskCompleted(task: Task): boolean {
+  return task.status === "completed" || (task.completions?.length ?? 0) > 0;
+}
 
 export function filterTasks(tasks: Task[], filters: TaskFilters): Task[] {
   return tasks.filter((t) => {
@@ -33,7 +76,7 @@ export function daysSinceCreated(task: Task, today: string = toDateKey()): numbe
  * harder the app makes it to ignore.
  */
 export function getAvoidanceScore(task: Task, today: string = toDateKey()): number {
-  if (task.status !== "active") return 0;
+  if (task.status !== "active" || isTaskCompletedOn(task, today)) return 0;
   return daysSinceCreated(task, today) * AVOIDANCE_PRIORITY_WEIGHT[task.priority] + task.timesSkipped * 40;
 }
 
@@ -54,6 +97,7 @@ export function getAvoidedTasks(tasks: Task[], count = 3, today: string = toDate
  * nudge toward easy quick wins so the list doesn't always favor the scariest task.
  */
 export function getFocusScore(task: Task, today: string = toDateKey()): number {
+  if (isTaskCompletedOn(task, today)) return -Infinity;
   let score = PRIORITY_SCORE[task.priority] + DIFFICULTY_SCORE[task.difficulty];
   score += getAvoidanceScore(task, today);
   if (isOverdue(task)) score += 1000;
@@ -94,7 +138,10 @@ export function sortTasks(tasks: Task[], sortBy: SortBy): Task[] {
 
 /** The single best task to start on right now, for the "Do this next" hero. */
 export function getFocusPick(tasks: Task[], excludeId?: string): Task | null {
-  const active = getActiveTasks(tasks).filter((t) => t.id !== excludeId);
+  const today = toDateKey();
+  const active = getActiveTasks(tasks).filter(
+    (t) => t.id !== excludeId && !isTaskCompletedOn(t, today)
+  );
   if (active.length === 0) return null;
   return sortTasks(active, "smart")[0];
 }
@@ -104,7 +151,7 @@ export function getActiveTasks(tasks: Task[]): Task[] {
 }
 
 export function getCompletedTasks(tasks: Task[]): Task[] {
-  return tasks.filter((t) => t.status === "completed");
+  return tasks.filter(isTaskCompleted);
 }
 
 export function getArchivedTasks(tasks: Task[]): Task[] {
@@ -112,7 +159,25 @@ export function getArchivedTasks(tasks: Task[]): Task[] {
 }
 
 export function getTopTasks(tasks: Task[], count = 3): Task[] {
-  return sortTasks(getActiveTasks(tasks), "smart").slice(0, count);
+  const today = toDateKey();
+  const eligible = getActiveTasks(tasks).filter((t) => !isTaskCompletedOn(t, today));
+  return sortTasks(eligible, "smart").slice(0, count);
+}
+
+/**
+ * What the Tasks page should render as "today's list": the whole active
+ * backlog, plus anything (scheduled or one-off) checked off today — so
+ * checking a task never makes it disappear, it just shows as done. Tasks
+ * completed on earlier days roll off into Archive/history instead of
+ * cluttering today's view forever.
+ */
+export function getTodaysTasks(tasks: Task[], today: string = toDateKey()): Task[] {
+  return tasks.filter((t) => {
+    if (t.status === "archived") return false;
+    if (t.status === "active") return true;
+    // status === "completed": only keep it visible if it was completed today.
+    return isTaskCompletedOn(t, today);
+  });
 }
 
 export function getNextOrder(tasks: Task[]): number {

@@ -12,6 +12,7 @@ interface TaskListProps {
   onSelectChange?: (id: string, selected: boolean) => void;
   onComplete: (id: string) => void;
   onUncomplete: (id: string) => void;
+  onToggleToday?: (id: string) => void;
   onEdit: (task: Task) => void;
   onArchive: (id: string) => void;
   onUnarchive: (id: string) => void;
@@ -27,6 +28,7 @@ export function TaskList({
   onSelectChange,
   onComplete,
   onUncomplete,
+  onToggleToday,
   onEdit,
   onArchive,
   onUnarchive,
@@ -55,6 +57,7 @@ export function TaskList({
               onSelectChange={onSelectChange ? (v) => onSelectChange(task.id, v) : undefined}
               onComplete={() => onComplete(task.id)}
               onUncomplete={() => onUncomplete(task.id)}
+              onToggleToday={onToggleToday ? () => onToggleToday(task.id) : undefined}
               onEdit={() => onEdit(task)}
               onArchive={() => onArchive(task.id)}
               onUnarchive={() => onUnarchive(task.id)}

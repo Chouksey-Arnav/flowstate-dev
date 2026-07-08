@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { supabaseKvStorage } from "@/lib/supabase/kvStorage";
 import type { Task, SubTask, Difficulty } from "@/types";
 import { generateId } from "@/lib/id";
-import { getNextOrder } from "@/lib/tasks";
+import { getNextOrder, isTaskCompletedOn } from "@/lib/tasks";
 import { toDateKey } from "@/lib/dates";
 import { xpForTask, DAILY_GOAL_BONUS_XP } from "@/lib/xp";
 import { useXpStore } from "./xpStore";
@@ -13,7 +13,7 @@ interface TaskState {
   tasks: Task[];
   hasHydrated: boolean;
   setHasHydrated: (value: boolean) => void;
-  addTask: (input: Omit<Task, "id" | "createdAt" | "status" | "subtasks" | "tags" | "order" | "timesSkipped" | "difficulty" | "xpOverride"> & {
+  addTask: (input: Omit<Task, "id" | "createdAt" | "status" | "subtasks" | "tags" | "order" | "timesSkipped" | "difficulty" | "xpOverride" | "completions"> & {
     difficulty?: Difficulty;
     subtasks?: SubTask[];
     tags?: string[];
@@ -23,6 +23,8 @@ interface TaskState {
   deleteTask: (id: string) => void;
   completeTask: (id: string) => void;
   uncompleteTask: (id: string) => void;
+  /** Checks/unchecks a scheduled (recurring) task for one specific day without ever removing it from the list. */
+  toggleTodayCompletion: (id: string, dateKey?: string) => void;
   archiveTask: (id: string) => void;
   unarchiveTask: (id: string) => void;
   toggleSubtask: (taskId: string, subtaskId: string) => void;
@@ -58,6 +60,8 @@ export const useTaskStore = create<TaskState>()(
           timesSkipped: 0,
           createdAt: new Date().toISOString(),
           xpOverride: input.xpOverride,
+          schedule: input.schedule,
+          completions: [],
         };
         set((state) => ({ tasks: [...state.tasks, task] }));
         return task;
@@ -102,6 +106,34 @@ export const useTaskStore = create<TaskState>()(
             t.id === id ? { ...t, status: "active", completedAt: undefined } : t
           ),
         })),
+
+      toggleTodayCompletion: (id, dateKey = toDateKey()) => {
+        const task = get().tasks.find((t) => t.id === id);
+        if (!task) return;
+        const wasDone = isTaskCompletedOn(task, dateKey);
+
+        set((state) => ({
+          tasks: state.tasks.map((t) => {
+            if (t.id !== id) return t;
+            const completions = wasDone
+              ? t.completions.filter((k) => k !== dateKey)
+              : [...t.completions, dateKey];
+            return { ...t, completions };
+          }),
+        }));
+
+        if (wasDone) return;
+
+        useXpStore.getState().awardXp(xpForTask(task), "task", `Completed "${task.title}"`);
+
+        const goal = useSettingsStore.getState().dailyTaskGoal;
+        if (goal > 0) {
+          const completedToday = get().tasks.filter((t) => isTaskCompletedOn(t, dateKey)).length;
+          if (completedToday === goal) {
+            useXpStore.getState().awardXp(DAILY_GOAL_BONUS_XP, "dailyGoal", "Hit today's task goal!");
+          }
+        }
+      },
 
       archiveTask: (id) =>
         set((state) => ({
@@ -162,12 +194,13 @@ export const useTaskStore = create<TaskState>()(
     {
       name: "flowstate-tasks",
       storage: createJSONStorage(() => supabaseKvStorage),
-      version: 1,
+      version: 2,
       migrate: (persistedState) => {
         const state = persistedState as { tasks?: Partial<Task>[] };
         const tasks: Task[] = (state.tasks ?? []).map((t) => ({
           difficulty: "MEDIUM" as Difficulty,
           timesSkipped: 0,
+          completions: [],
           ...t,
         })) as Task[];
         return { ...state, tasks };

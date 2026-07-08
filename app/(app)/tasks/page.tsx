@@ -18,7 +18,7 @@ import { SkipReasonDialog } from "@/components/tasks/skip-reason-dialog";
 import { useTaskStore } from "@/store/taskStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useReflectionStore } from "@/store/reflectionStore";
-import { getActiveTasks, filterTasks, sortTasks, reorderTasks, getFocusPick } from "@/lib/tasks";
+import { getActiveTasks, getTodaysTasks, filterTasks, sortTasks, reorderTasks, getFocusPick, isTaskCompletedOn } from "@/lib/tasks";
 import { fireTaskCompleteConfetti } from "@/lib/confetti";
 import { playCompletionChime } from "@/lib/audio";
 import { calculateGoalStreak } from "@/lib/streaks";
@@ -30,6 +30,7 @@ export default function TasksPage() {
   const tasks = useTaskStore((s) => s.tasks);
   const completeTask = useTaskStore((s) => s.completeTask);
   const uncompleteTask = useTaskStore((s) => s.uncompleteTask);
+  const toggleTodayCompletion = useTaskStore((s) => s.toggleTodayCompletion);
   const archiveTask = useTaskStore((s) => s.archiveTask);
   const unarchiveTask = useTaskStore((s) => s.unarchiveTask);
   const deleteTask = useTaskStore((s) => s.deleteTask);
@@ -52,18 +53,17 @@ export default function TasksPage() {
   const [skippedFocusId, setSkippedFocusId] = useState<string | undefined>(undefined);
   const [skipReasonTaskId, setSkipReasonTaskId] = useState<string | undefined>(undefined);
 
+  const todayKey = toDateKey();
   const activeTasks = getActiveTasks(tasks);
-  const filtered = filterTasks(activeTasks, filters);
+  const visibleTasks = getTodaysTasks(tasks, todayKey);
+  const filtered = filterTasks(visibleTasks, filters);
   const sorted = sortTasks(filtered, sortBy);
   const draggable = sortBy === "manual" && !filters.category && !filters.priority && !filters.difficulty;
 
   const focusPick = getFocusPick(tasks, skippedFocusId) ?? getFocusPick(tasks);
 
-  const todayKey = toDateKey();
-  const completedToday = tasks.filter(
-    (t) => t.completedAt && toDateKey(new Date(t.completedAt)) === todayKey
-  ).length;
-  const totalToday = activeTasks.length + completedToday;
+  const completedToday = tasks.filter((t) => isTaskCompletedOn(t, todayKey)).length;
+  const totalToday = visibleTasks.length;
   const streak = calculateGoalStreak(tasks, dailyTaskGoal).current;
 
   function handleComplete(id: string) {
@@ -71,6 +71,16 @@ export default function TasksPage() {
     if (confettiEnabled) fireTaskCompleteConfetti();
     if (soundEnabled) playCompletionChime();
     setUndo({ taskId: id, message: getRandomCompletionLine() });
+  }
+
+  function handleToggleToday(id: string) {
+    const task = tasks.find((t) => t.id === id);
+    const wasDone = task ? isTaskCompletedOn(task, todayKey) : false;
+    toggleTodayCompletion(id);
+    if (!wasDone) {
+      if (confettiEnabled) fireTaskCompleteConfetti();
+      if (soundEnabled) playCompletionChime();
+    }
   }
 
   function handleReorder(draggedId: string, targetId: string) {
@@ -89,7 +99,11 @@ export default function TasksPage() {
   }
 
   function bulkComplete() {
-    selectedIds.forEach((id) => completeTask(id));
+    selectedIds.forEach((id) => {
+      const task = tasks.find((t) => t.id === id);
+      if (task?.schedule) toggleTodayCompletion(id);
+      else completeTask(id);
+    });
     setSelectedIds(new Set());
   }
   function bulkArchive() {
@@ -173,6 +187,7 @@ export default function TasksPage() {
               onSelectChange={toggleSelect}
               onComplete={handleComplete}
               onUncomplete={uncompleteTask}
+              onToggleToday={handleToggleToday}
               onEdit={(task) => {
                 setEditingTask(task);
                 setDialogOpen(true);

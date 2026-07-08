@@ -7,18 +7,19 @@ import {
   getMonthEnd,
   getWeekdayLabels,
 } from "./dates";
+import { completionDateKeys, isTaskCompleted } from "./tasks";
 import type { Task, Habit, FocusSession, Category, FirstDayOfWeek } from "@/types";
 
 export function getTasksCompletedInRange(tasks: Task[], start: Date, end: Date): Task[] {
-  return tasks.filter((t) => {
-    if (!t.completedAt) return false;
-    const d = new Date(t.completedAt);
-    return d >= start && d <= end;
-  });
+  const startKey = toDateKey(start);
+  const endKey = toDateKey(end);
+  return tasks.filter((t) =>
+    completionDateKeys(t).some((key) => key >= startKey && key <= endKey)
+  );
 }
 
 export function countTasksCompletedOn(tasks: Task[], dateKey: string): number {
-  return tasks.filter((t) => t.completedAt && toDateKey(new Date(t.completedAt)) === dateKey).length;
+  return tasks.filter((t) => completionDateKeys(t).includes(dateKey)).length;
 }
 
 export function getFocusMinutesInRange(sessions: FocusSession[], start: Date, end: Date): number {
@@ -62,11 +63,11 @@ export function getHabitCompletionRate(habits: Habit[], days: number, today: Dat
 const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export function getMostProductiveWeekday(tasks: Task[]): { weekday: string; count: number } | null {
-  const completed = tasks.filter((t) => t.completedAt);
-  if (completed.length === 0) return null;
   const counts = new Array(7).fill(0);
-  for (const t of completed) {
-    counts[new Date(t.completedAt!).getDay()]++;
+  for (const t of tasks) {
+    for (const key of completionDateKeys(t)) {
+      counts[new Date(`${key}T00:00:00`).getDay()]++;
+    }
   }
   let maxIdx = 0;
   for (let i = 1; i < 7; i++) if (counts[i] > counts[maxIdx]) maxIdx = i;
@@ -95,7 +96,7 @@ export interface CategoryCount {
 export function getCategoryBreakdown(tasks: Task[]): CategoryCount[] {
   const counts = new Map<Category, number>();
   for (const t of tasks) {
-    if (t.status !== "completed") continue;
+    if (!isTaskCompleted(t)) continue;
     counts.set(t.category, (counts.get(t.category) ?? 0) + 1);
   }
   return Array.from(counts.entries())
