@@ -21,7 +21,7 @@ import { TodayProgressCard } from "@/components/dashboard/today-progress-card";
 import { HabitStatusRow } from "@/components/dashboard/habit-status-row";
 import { WeeklyChartMini } from "@/components/dashboard/weekly-chart-mini";
 import { QuickAddButton } from "@/components/dashboard/quick-add-button";
-import { getTopTasks, getActiveTasks, getAvoidedTasks } from "@/lib/tasks";
+import { getTopTasks, getActiveTasks, getAvoidedTasks, getTodaysTasks, isTaskCompletedOn } from "@/lib/tasks";
 import { calculateGoalStreak } from "@/lib/streaks";
 import { getGoalStatus } from "@/lib/dailyGoal";
 import { getWeeklySeries } from "@/lib/stats";
@@ -32,6 +32,7 @@ import { useNowTick } from "@/hooks/useNowTick";
 export default function DashboardPage() {
   const tasks = useTaskStore((s) => s.tasks);
   const completeTask = useTaskStore((s) => s.completeTask);
+  const toggleTodayCompletion = useTaskStore((s) => s.toggleTodayCompletion);
   const habits = useHabitStore((s) => s.habits);
   const reflectionEntries = useReflectionStore((s) => s.entries);
   const dailyGoal = useSettingsStore((s) => s.dailyGoal);
@@ -52,18 +53,22 @@ export default function DashboardPage() {
   const weeklySeries = getWeeklySeries(tasks, firstDayOfWeek);
 
   const todayKey = toDateKey();
-  const completedToday = tasks.filter(
-    (t) => t.completedAt && toDateKey(new Date(t.completedAt)) === todayKey
-  ).length;
-  const totalToday = activeTasks.length + completedToday;
+  const completedToday = tasks.filter((t) => isTaskCompletedOn(t, todayKey)).length;
+  const totalToday = getTodaysTasks(tasks, todayKey).length;
   const goalStatus = getGoalStatus(completedToday, dailyTaskGoal, now);
 
   const isCommittedToday = commitDate === todayKey && !!commitTaskId;
   const committedTask = tasks.find((t) => t.id === commitTaskId);
-  const isCompletedToday = committedTask?.status === "completed";
+  const isCompletedToday = committedTask ? isTaskCompletedOn(committedTask, todayKey) : false;
 
   const streakAtRisk = streak.current > 0 && (goalStatus.tier === "warning" || goalStatus.tier === "critical");
   const quote = getDashboardQuote({ hasAvoidedTask: avoidedTasks.length > 0, streakAtRisk });
+
+  function handleCompleteAnyTask(id: string) {
+    const task = tasks.find((t) => t.id === id);
+    if (task?.schedule) toggleTodayCompletion(id);
+    else completeTask(id);
+  }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -92,7 +97,7 @@ export default function DashboardPage() {
         isCommittedToday={isCommittedToday}
         isCompletedToday={isCompletedToday}
         onCommit={(taskId) => setCommitment(taskId, todayKey)}
-        onComplete={completeTask}
+        onComplete={handleCompleteAnyTask}
       />
 
       <AvoidedTasksCard tasks={avoidedTasks} />
@@ -116,7 +121,7 @@ export default function DashboardPage() {
 
       <DailyGoalEditable goal={dailyGoal} onSave={(goal) => updateSettings({ dailyGoal: goal })} />
 
-      <TopTasksCard tasks={topTasks} onComplete={completeTask} />
+      <TopTasksCard tasks={topTasks} onComplete={handleCompleteAnyTask} />
 
       <HabitStatusRow habits={[...habits].sort((a, b) => a.order - b.order)} />
 
