@@ -14,6 +14,7 @@ import { ArchiveView } from "@/components/tasks/archive-view";
 import { UndoToast } from "@/components/tasks/undo-toast";
 import { MomentumBar } from "@/components/tasks/momentum-bar";
 import { FocusPickCard } from "@/components/tasks/focus-pick-card";
+import { NoTasksNudge } from "@/components/tasks/no-tasks-nudge";
 import { SkipReasonDialog } from "@/components/tasks/skip-reason-dialog";
 import { useTaskStore } from "@/store/taskStore";
 import { useSettingsStore } from "@/store/settingsStore";
@@ -146,7 +147,7 @@ export default function TasksPage() {
         <>
           <MomentumBar completedToday={completedToday} totalToday={totalToday} streak={streak} />
 
-          {focusPick && (
+          {focusPick ? (
             <FocusPickCard
               task={focusPick}
               canShowAnother={activeTasks.length > 1}
@@ -154,6 +155,13 @@ export default function TasksPage() {
                 skipTask(focusPick.id);
                 setSkippedFocusId(focusPick.id);
                 setSkipReasonTaskId(focusPick.id);
+              }}
+            />
+          ) : (
+            <NoTasksNudge
+              onAddTask={() => {
+                setEditingTask(undefined);
+                setDialogOpen(true);
               }}
             />
           )}

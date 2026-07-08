@@ -77,7 +77,7 @@ export const useTaskStore = create<TaskState>()(
 
       completeTask: (id) => {
         const task = get().tasks.find((t) => t.id === id);
-        if (!task) return;
+        if (!task || task.status === "completed") return;
         set((state) => ({
           tasks: state.tasks.map((t) =>
             t.id === id ? { ...t, status: "completed", completedAt: new Date().toISOString() } : t
@@ -100,17 +100,36 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      uncompleteTask: (id) =>
+      uncompleteTask: (id) => {
+        const task = get().tasks.find((t) => t.id === id);
+        if (!task || task.status !== "completed") return;
+
+        const todayKey = toDateKey();
+        const wasCompletedToday = !!task.completedAt && toDateKey(new Date(task.completedAt)) === todayKey;
+        const goal = useSettingsStore.getState().dailyTaskGoal;
+        const completedTodayBeforeUndo = get().tasks.filter(
+          (t) => t.completedAt && toDateKey(new Date(t.completedAt)) === todayKey
+        ).length;
+
         set((state) => ({
           tasks: state.tasks.map((t) =>
             t.id === id ? { ...t, status: "active", completedAt: undefined } : t
           ),
-        })),
+        }));
+
+        useXpStore.getState().revokeXp(xpForTask(task), "task", `Unchecked "${task.title}"`);
+
+        if (wasCompletedToday && goal > 0 && completedTodayBeforeUndo === goal) {
+          useXpStore.getState().revokeXp(DAILY_GOAL_BONUS_XP, "dailyGoal", "Lost today's task goal bonus");
+        }
+      },
 
       toggleTodayCompletion: (id, dateKey = toDateKey()) => {
         const task = get().tasks.find((t) => t.id === id);
         if (!task) return;
         const wasDone = isTaskCompletedOn(task, dateKey);
+        const completedTodayBefore = get().tasks.filter((t) => isTaskCompletedOn(t, dateKey)).length;
+        const goal = useSettingsStore.getState().dailyTaskGoal;
 
         set((state) => ({
           tasks: state.tasks.map((t) => {
@@ -122,11 +141,16 @@ export const useTaskStore = create<TaskState>()(
           }),
         }));
 
-        if (wasDone) return;
+        if (wasDone) {
+          useXpStore.getState().revokeXp(xpForTask(task), "task", `Unchecked "${task.title}"`);
+          if (goal > 0 && completedTodayBefore === goal) {
+            useXpStore.getState().revokeXp(DAILY_GOAL_BONUS_XP, "dailyGoal", "Lost today's task goal bonus");
+          }
+          return;
+        }
 
         useXpStore.getState().awardXp(xpForTask(task), "task", `Completed "${task.title}"`);
 
-        const goal = useSettingsStore.getState().dailyTaskGoal;
         if (goal > 0) {
           const completedToday = get().tasks.filter((t) => isTaskCompletedOn(t, dateKey)).length;
           if (completedToday === goal) {

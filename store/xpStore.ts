@@ -13,6 +13,8 @@ interface XpState {
   hasHydrated: boolean;
   setHasHydrated: (value: boolean) => void;
   awardXp: (amount: number, source: XpSource, label: string) => void;
+  /** Reverses a previously-awarded amount (e.g. a task was unchecked) — never drops totalXp below 0. */
+  revokeXp: (amount: number, source: XpSource, label: string) => void;
   acknowledgeLevel: (level: number) => void;
   resetAll: () => void;
 }
@@ -34,6 +36,15 @@ export const useXpStore = create<XpState>()(
           events: [event, ...state.events].slice(0, 50),
         }));
         useXpToastStore.getState().push(amount, label);
+      },
+
+      revokeXp: (amount, source, label) => {
+        if (amount <= 0) return;
+        const event: XpEvent = { id: generateId(), source, amount: -amount, label, at: new Date().toISOString() };
+        set((state) => ({
+          totalXp: Math.max(0, state.totalXp - amount),
+          events: [event, ...state.events].slice(0, 50),
+        }));
       },
 
       acknowledgeLevel: (level) => set({ lastSeenLevel: level }),
