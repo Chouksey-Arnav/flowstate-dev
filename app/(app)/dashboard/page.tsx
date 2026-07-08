@@ -6,6 +6,7 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { useReflectionStore } from "@/store/reflectionStore";
 import { Greeting } from "@/components/dashboard/greeting";
 import { DateCounter } from "@/components/dashboard/date-counter";
+import { DailyReminderCard } from "@/components/dashboard/daily-reminder-card";
 import { LevelHeroCard } from "@/components/dashboard/level-hero-card";
 import { StreakCard } from "@/components/dashboard/streak-card";
 import { DailyGoalEditable } from "@/components/dashboard/daily-goal-editable";
@@ -21,6 +22,7 @@ import { TodayProgressCard } from "@/components/dashboard/today-progress-card";
 import { HabitStatusRow } from "@/components/dashboard/habit-status-row";
 import { WeeklyChartMini } from "@/components/dashboard/weekly-chart-mini";
 import { QuickAddButton } from "@/components/dashboard/quick-add-button";
+import { SectionHeading } from "@/components/dashboard/section-heading";
 import { getTopTasks, getActiveTasks, getAvoidedTasks, getTodaysTasks, isTaskCompletedOn } from "@/lib/tasks";
 import { calculateGoalStreak } from "@/lib/streaks";
 import { getGoalStatus } from "@/lib/dailyGoal";
@@ -82,6 +84,8 @@ export default function DashboardPage() {
 
       <LevelHeroCard />
 
+      <DailyReminderCard totalToday={totalToday} completedToday={completedToday} />
+
       <MotivationalQuote quote={quote} intense={avoidedTasks.length > 0 || streakAtRisk} />
 
       <StreakWarningBanner
@@ -91,41 +95,53 @@ export default function DashboardPage() {
         streak={streak.current}
       />
 
-      <CommitmentCard
-        activeTasks={activeTasks}
-        committedTask={committedTask}
-        isCommittedToday={isCommittedToday}
-        isCompletedToday={isCompletedToday}
-        onCommit={(taskId) => setCommitment(taskId, todayKey)}
-        onComplete={handleCompleteAnyTask}
-      />
+      <div className="space-y-4">
+        <SectionHeading title="Today" subtitle="What actually needs to happen" />
 
-      <AvoidedTasksCard tasks={avoidedTasks} />
-
-      <ReflectionInsightCard entries={reflectionEntries} />
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <StreakCard current={streak.current} best={streak.best} />
-        <GoalProgressCard
-          completedToday={completedToday}
-          goal={dailyTaskGoal}
-          tier={goalStatus.tier}
-          onChangeGoal={(goal) => updateSettings({ dailyTaskGoal: goal })}
+        <CommitmentCard
+          activeTasks={activeTasks}
+          committedTask={committedTask}
+          isCommittedToday={isCommittedToday}
+          isCompletedToday={isCompletedToday}
+          onCommit={(taskId) => setCommitment(taskId, todayKey)}
+          onComplete={handleCompleteAnyTask}
         />
+
+        <TopTasksCard tasks={topTasks} onComplete={handleCompleteAnyTask} />
+
+        <AvoidedTasksCard tasks={avoidedTasks} />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <TodayProgressCard completedToday={completedToday} totalToday={totalToday} />
-        <PomodoroMiniWidget />
+      <div className="space-y-4">
+        <SectionHeading title="Progress" subtitle="Streaks, goals, and today's numbers" />
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <StreakCard current={streak.current} best={streak.best} />
+          <GoalProgressCard
+            completedToday={completedToday}
+            goal={dailyTaskGoal}
+            tier={goalStatus.tier}
+            onChangeGoal={(goal) => updateSettings({ dailyTaskGoal: goal })}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <TodayProgressCard completedToday={completedToday} totalToday={totalToday} />
+          <PomodoroMiniWidget />
+        </div>
+
+        <DailyGoalEditable goal={dailyGoal} onSave={(goal) => updateSettings({ dailyGoal: goal })} />
       </div>
 
-      <DailyGoalEditable goal={dailyGoal} onSave={(goal) => updateSettings({ dailyGoal: goal })} />
+      <div className="space-y-4">
+        <SectionHeading title="Insights" subtitle="How the week is actually going" />
 
-      <TopTasksCard tasks={topTasks} onComplete={handleCompleteAnyTask} />
+        <ReflectionInsightCard entries={reflectionEntries} />
 
-      <HabitStatusRow habits={[...habits].sort((a, b) => a.order - b.order)} />
+        <HabitStatusRow habits={[...habits].sort((a, b) => a.order - b.order)} />
 
-      <WeeklyChartMini data={weeklySeries} />
+        <WeeklyChartMini data={weeklySeries} />
+      </div>
     </div>
   );
 }
