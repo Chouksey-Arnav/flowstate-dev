@@ -17,6 +17,13 @@ export interface SubTask {
   completed: boolean;
 }
 
+/** A task that recurs across consecutive days instead of being done once. */
+export interface TaskSchedule {
+  startDate: string; // local date key, YYYY-MM-DD
+  /** How many consecutive days (including startDate) this task is active for. 1 = a single day. */
+  repeatDays: number;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -32,9 +39,17 @@ export interface Task {
   order: number;
   timesSkipped: number;
   createdAt: string; // ISO timestamp
-  completedAt?: string; // ISO timestamp
+  completedAt?: string; // ISO timestamp — one-off (non-scheduled) tasks only
   /** Manual XP override — when set, this exact amount is awarded instead of the computed value. */
   xpOverride?: number;
+  /** When set, this task recurs across `schedule`'s window instead of being completed once. */
+  schedule?: TaskSchedule;
+  /**
+   * Local date keys (YYYY-MM-DD) this task was checked off on. For scheduled
+   * tasks this is the whole point — checking a day off never removes the
+   * task, it just records that day as done and it can be unchecked any time.
+   */
+  completions: string[];
 }
 
 export type HabitCategory = "Health" | "Business" | "Learning" | "Mental" | "Misc";

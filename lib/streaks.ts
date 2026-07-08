@@ -1,4 +1,5 @@
 import { toDateKey, daysAgoKey } from "./dates";
+import { completionDateKeys } from "./tasks";
 import type { Task } from "@/types";
 
 export interface Streak {
@@ -9,7 +10,7 @@ export interface Streak {
 export function getCompletedDateKeys(tasks: Task[]): Set<string> {
   const keys = new Set<string>();
   for (const t of tasks) {
-    if (t.completedAt) keys.add(toDateKey(new Date(t.completedAt)));
+    for (const key of completionDateKeys(t)) keys.add(key);
   }
   return keys;
 }
@@ -22,9 +23,9 @@ export function calculateTaskStreak(tasks: Task[], today: Date = new Date()): St
 export function getDailyCompletionCounts(tasks: Task[]): Map<string, number> {
   const counts = new Map<string, number>();
   for (const t of tasks) {
-    if (!t.completedAt) continue;
-    const key = toDateKey(new Date(t.completedAt));
-    counts.set(key, (counts.get(key) ?? 0) + 1);
+    for (const key of completionDateKeys(t)) {
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
   }
   return counts;
 }

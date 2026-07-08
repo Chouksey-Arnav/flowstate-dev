@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { GripVertical, MoreVertical, Pencil, Archive, ArchiveRestore, Trash2, Clock, Zap, Check, Timer, Target, Sparkles } from "lucide-react";
+import { GripVertical, MoreVertical, Pencil, Archive, ArchiveRestore, Trash2, Clock, Zap, Check, Timer, Target, Sparkles, Repeat } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +20,7 @@ import { SubtaskList } from "./subtask-list";
 import { cn } from "@/lib/utils";
 import { formatDisplayDate } from "@/lib/dates";
 import { isOverdue } from "@/lib/overdue";
-import { getAvoidanceScore, daysSinceCreated, AVOIDANCE_THRESHOLD } from "@/lib/tasks";
+import { getAvoidanceScore, daysSinceCreated, AVOIDANCE_THRESHOLD, isTaskCompletedOn, getScheduleDayLabel } from "@/lib/tasks";
 import { xpForTask } from "@/lib/xp";
 import { toDateKey } from "@/lib/dates";
 import { usePomodoroStore } from "@/store/pomodoroStore";
@@ -34,6 +34,7 @@ interface TaskItemProps {
   onSelectChange?: (selected: boolean) => void;
   onComplete: () => void;
   onUncomplete: () => void;
+  onToggleToday?: () => void;
   onEdit: () => void;
   onArchive: () => void;
   onUnarchive: () => void;
@@ -53,6 +54,7 @@ export function TaskItem({
   onSelectChange,
   onComplete,
   onUncomplete,
+  onToggleToday,
   onEdit,
   onArchive,
   onUnarchive,
@@ -66,8 +68,20 @@ export function TaskItem({
   const setCommitment = useSettingsStore((s) => s.setCommitment);
   const commitTaskId = useSettingsStore((s) => s.commitTaskId);
   const commitDate = useSettingsStore((s) => s.commitDate);
-  const completed = task.status === "completed";
+  const today = toDateKey();
   const archived = task.status === "archived";
+  const completed = task.schedule ? isTaskCompletedOn(task, today) : task.status === "completed";
+  const scheduleLabel = task.schedule ? getScheduleDayLabel(task.schedule, today) : null;
+
+  function handleToggle() {
+    if (task.schedule) {
+      onToggleToday?.();
+    } else if (completed) {
+      onUncomplete();
+    } else {
+      onComplete();
+    }
+  }
   const overdue = isOverdue(task);
   const subtaskDone = task.subtasks.filter((s) => s.completed).length;
   const quickWin = !completed && !!task.estimatedMinutes && task.estimatedMinutes <= 15;
@@ -112,8 +126,8 @@ export function TaskItem({
         )}
         <Checkbox
           checked={completed}
-          onCheckedChange={() => (completed ? onUncomplete() : onComplete())}
-          title={completed ? "Mark incomplete" : "Mark complete"}
+          onCheckedChange={handleToggle}
+          title={completed ? "Uncheck today" : task.schedule ? "Check off today" : "Mark complete"}
           className={cn(
             "mt-1 rounded-full transition-transform",
             completed && "border-flow-green bg-flow-green text-primary-foreground"
@@ -146,9 +160,14 @@ export function TaskItem({
                 <Zap className="h-3 w-3" /> Quick win
               </span>
             )}
+            {scheduleLabel && (
+              <span className="flex items-center gap-1 rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent">
+                <Repeat className="h-3 w-3" /> {scheduleLabel}
+              </span>
+            )}
             {completed && (
               <span className="flex items-center gap-1 rounded-full border border-flow-green/30 bg-flow-green/10 px-2 py-0.5 text-xs font-medium text-flow-green">
-                <Check className="h-3 w-3" /> Done
+                <Check className="h-3 w-3" /> {task.schedule ? "Done today" : "Done"}
               </span>
             )}
             {task.dueDate && (
