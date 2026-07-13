@@ -41,7 +41,7 @@ NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — it redirects to `/login` (or `/dashboard` if already signed in).
+Open [http://localhost:3000](http://localhost:3000) to see the landing page (or get redirected straight to `/dashboard` if you're already signed in).
 
 Other useful scripts:
 
