@@ -1,14 +1,22 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isSupabaseConfigured, DUMMY_URL, DUMMY_KEY } from "./client";
 
 const PUBLIC_PATHS = ["/login", "/signup"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  const url = isSupabaseConfigured()
+    ? process.env.NEXT_PUBLIC_SUPABASE_URL!
+    : DUMMY_URL;
+  const key = isSupabaseConfigured()
+    ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    : DUMMY_KEY;
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    key,
     {
       cookies: {
         getAll() {
@@ -25,25 +33,34 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Required: this actually validates the session and refreshes it if
-  // needed, refreshing the token cookies via setAll above.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let hasUser = false;
+
+  if (isSupabaseConfigured()) {
+    // Required: this actually validates the session and refreshes it if
+    // needed, refreshing the token cookies via setAll above.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    hasUser = !!user;
+  } else {
+    // If Supabase is not configured, we look at our local authentication cookie.
+    const localSession = request.cookies.get("flowstate-local-session");
+    hasUser = !!localSession;
+  }
 
   const path = request.nextUrl.pathname;
   const isPublicPath = path === "/" || PUBLIC_PATHS.some((p) => path.startsWith(p));
 
-  if (!user && !isPublicPath) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+  if (!hasUser && !isPublicPath) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/login";
+    return NextResponse.redirect(redirectUrl);
   }
 
-  if (user && isPublicPath) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+  if (hasUser && isPublicPath) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/dashboard";
+    return NextResponse.redirect(redirectUrl);
   }
 
   return response;
