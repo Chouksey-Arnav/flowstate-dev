@@ -1,0 +1,30 @@
+is_branch = false
+project_id = "elntcolvgpngzcxqdsdc"
+
+[api]
+enabled = true
+max_body_size = "20 MiB"
+default_query_timeout = "30s"
+
+[db]
+major_version = 15
+
+[realtime]
+enabled = true
+max_bytes_per_second = 1048576
+
+[auth]
+enable_signup = true
+email_max_frequency = "0s"
+email_rate_limit_tokens_per_interval = 180
+email_rate_limit_interval = "60s"
+sms_max_frequency = "0s"
+sms_rate_limit_tokens_per_interval = 100
+sms_rate_limit_interval = "60s"
+email_templates_folder = "auth/email"
+
+[storage]
+file_size_limit = 52428800
+
+[vector]
+enabled = true
