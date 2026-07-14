@@ -12,6 +12,7 @@ const LINKS = [
   { href: "#gamification", label: "Progress" },
   { href: "#privacy", label: "Privacy" },
   { href: "#opensource", label: "Open source" },
+  { href: "#faq", label: "FAQ" },
 ];
 
 export function SiteNav() {
