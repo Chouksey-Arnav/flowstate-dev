@@ -77,10 +77,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Update username
+    // Update username (stored as lowercase for case-insensitive matching)
     const { error: updateError } = await admin
       .from("flowstate_profiles")
-      .update({ username })
+      .update({ username: username.toLowerCase() })
       .eq("id", userData.user.id);
 
     if (updateError) {

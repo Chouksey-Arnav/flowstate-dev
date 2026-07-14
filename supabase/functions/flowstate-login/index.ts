@@ -38,11 +38,11 @@ Deno.serve(async (req) => {
 
     const admin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-    // Look up user by username in flowstate_profiles
+    // Look up user by username in flowstate_profiles (case-insensitive)
     const { data: profileData, error: profileError } = await admin
       .from("flowstate_profiles")
       .select("id")
-      .eq("username", username)
+      .eq("username", username.toLowerCase())
       .maybeSingle();
 
     if (profileError || !profileData) {

@@ -57,12 +57,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Insert profile with username
+    // Insert profile with username (stored as lowercase for case-insensitive matching)
     const { error: profileError } = await admin
       .from("flowstate_profiles")
       .insert({
         id: authData.user.id,
-        username,
+        username: username.toLowerCase(),
       });
 
     if (profileError) {
