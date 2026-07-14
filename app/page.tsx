@@ -15,13 +15,14 @@ import { GamificationSection } from "@/components/marketing/gamification-section
 import { PrivacySection } from "@/components/marketing/privacy-section";
 import { TechStackSection } from "@/components/marketing/tech-stack-section";
 import { OpenSourceSection } from "@/components/marketing/open-source-section";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { FinalCtaSection } from "@/components/marketing/final-cta-section";
 import { SiteFooter } from "@/components/marketing/site-footer";
 
 export const metadata: Metadata = {
-  title: "FlowState — Stop thinking. Start doing.",
+  title: "Flowstate | Open-Source Productivity Tool & Daily Planner",
   description:
-    "FlowState is a dark, no-excuses, open-source productivity app. Tasks, a drift-free focus timer, habits, and stats — wired to a leveling system that scores your discipline and hunts the one task you keep avoiding.",
+    "Flowstate is a dark, no-excuses, open-source productivity tool. Tasks, a drift-free focus timer, habits, and stats — a minimalist developer planner wired to a leveling system that scores your discipline and hunts the one task you keep avoiding.",
 };
 
 export default function LandingPage() {
@@ -41,6 +42,7 @@ export default function LandingPage() {
       <PrivacySection />
       <TechStackSection />
       <OpenSourceSection />
+      <FaqSection />
       <FinalCtaSection />
       <SiteFooter />
     </div>
