@@ -1,5 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.4";
-import { randomUUID } from "https://deno.land/std@0.208.0/crypto/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -40,7 +39,7 @@ Deno.serve(async (req) => {
     const admin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     // Generate synthetic email based on username
-    const uuid = randomUUID();
+    const uuid = crypto.randomUUID();
     const email = `${uuid}@flowstate.internal`;
 
     // Create user in auth.users
