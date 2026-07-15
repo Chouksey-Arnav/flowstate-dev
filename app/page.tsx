@@ -18,6 +18,7 @@ import { OpenSourceSection } from "@/components/marketing/open-source-section";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { FinalCtaSection } from "@/components/marketing/final-cta-section";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { FirstVisitTip } from "@/components/marketing/first-visit-tip";
 
 export const metadata: Metadata = {
   title: "Flowstate | Open-Source Productivity Tool & Daily Planner",
@@ -45,6 +46,7 @@ export default function LandingPage() {
       <FaqSection />
       <FinalCtaSection />
       <SiteFooter />
+      <FirstVisitTip />
     </div>
   );
 }

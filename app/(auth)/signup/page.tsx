@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { UsernameField } from "@/components/auth/username-field";
@@ -106,9 +106,8 @@ export default function SignupPage() {
           />
           <div className="space-y-1.5">
             <Label htmlFor="signup-password">Password</Label>
-            <Input
+            <PasswordInput
               id="signup-password"
-              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
@@ -118,9 +117,8 @@ export default function SignupPage() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="signup-confirm-password">Confirm password</Label>
-            <Input
+            <PasswordInput
               id="signup-confirm-password"
-              type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               autoComplete="new-password"
