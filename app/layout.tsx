@@ -6,7 +6,7 @@ import "./globals.css";
 
 const TITLE = "Flowstate | Open-Source Productivity Tool & Daily Planner";
 const DESCRIPTION =
-  "Flowstate is a free, open-source productivity tool built to help you reach flow state faster. A minimalist developer planner with tasks, a drift-free focus timer, habits, and stats — no paywall, no tracking, MIT licensed.";
+  "FlowState: a dark, minimalist productivity tool with tasks, a drift-free Pomodoro timer, habits & stats. Open-source, no paywalls.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

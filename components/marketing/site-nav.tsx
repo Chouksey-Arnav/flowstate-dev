@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { LogoMark } from "@/components/marketing/logo-mark";
 import { GithubStarButton } from "@/components/marketing/github-star-button";
+import { SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -21,7 +22,7 @@ export function SiteNav() {
   return (
     <nav className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-3.5">
-        <Link href="#top" className="flex items-center gap-2.5 text-foreground" onClick={() => setOpen(false)}>
+        <Link href={`${SITE_URL}/#top`} className="flex items-center gap-2.5 text-foreground" onClick={() => setOpen(false)}>
           <LogoMark className="h-8 w-8" />
           <span className="text-lg font-bold tracking-tight">FlowState</span>
         </Link>
