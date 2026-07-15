@@ -54,13 +54,17 @@ npm run build       # production build
 ## Features
 
 - **Dashboard** — greeting, day-of-year counter, task streak, editable daily goal, top 3 tasks, an independent mini Pomodoro widget, a rotating motivational quote, habit status dots, a mini weekly chart, and quick-add.
-- **Tasks** — full CRUD with subtasks, categories, priorities, due dates, filtering/sorting, manual drag-to-reorder, brain-dump rapid entry, archive view, bulk actions, and confetti + chime + undo toast on completion.
+- **Tasks** — full CRUD with subtasks, categories, priorities, due dates, filtering/sorting, manual drag-to-reorder, brain-dump rapid entry, archive view, bulk actions, an optional personal reward per task, and confetti + chime + undo toast on completion.
 - **Focus** — a drift-free Pomodoro timer (work/break/long-break), an SVG ring display, a session log, a "Watch all" lofi video grid, a distraction-free Full Focus Mode, and ambient sound (lofi/rain/white/brown noise, all synthesized).
-- **Habits** — weekly completion grid, streaks (current + best), a Perfect Day badge, drag-to-reorder, and six pre-loaded defaults.
+- **Habits** — weekly completion grid, streaks (current + best), a Perfect Day badge, drag-to-reorder, six pre-loaded defaults, and a large tap-to-check-off panel front-and-center on the dashboard.
 - **Stats** — completion/focus-time/habit-rate/streak stat cards, a category donut, a weekly bar chart, and a CSS-grid monthly heatmap with month navigation.
 - **Settings** — account (username, change username, log out), profile, Pomodoro durations and timer sound, behavior toggles (confetti, sound, auto-start, first day of week), and data actions (JSON export, clear completed, reset habit streaks, reset everything).
 
 Responsive down to mobile widths: the sidebar collapses below `md` in favor of a bottom tab bar.
+
+## Docs
+
+The full documentation site lives at `/docs` (linked from the landing page nav and footer) — a dedicated write-up for every tool: Tasks, Rewards, Focus, Habits, Stats, Gamification & XP, the Site Blocker, Settings & Data, Accounts & Sync, and Privacy & Self-Hosting. It's public regardless of login state, unlike the rest of the app.
 
 ## Deploying
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Target, ArrowRight, CheckCircle2, Lock } from "lucide-react";
+import { Target, ArrowRight, CheckCircle2, Lock, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -78,6 +78,11 @@ export function CommitmentCard({
         <div className="relative mt-3 flex flex-wrap items-center gap-1.5">
           <PriorityBadge priority={committedTask.priority} />
           <DifficultyBadge difficulty={committedTask.difficulty} />
+          {committedTask.reward && (
+            <span className="flex items-center gap-1 truncate rounded-full border border-flow-yellow/30 bg-flow-yellow/10 px-2 py-0.5 text-xs font-medium text-flow-yellow">
+              <Gift className="h-3 w-3 shrink-0" /> {committedTask.reward}
+            </span>
+          )}
         </div>
         <div className="relative mt-4 flex flex-wrap gap-2">
           <Button onClick={() => startFocus(committedTask.id)}>

@@ -42,6 +42,8 @@ export interface Task {
   completedAt?: string; // ISO timestamp — one-off (non-scheduled) tasks only
   /** Manual XP override — when set, this exact amount is awarded instead of the computed value. */
   xpOverride?: number;
+  /** Optional personal reward the user promises themselves for finishing this task — entirely optional, on top of XP. */
+  reward?: string;
   /** When set, this task recurs across `schedule`'s window instead of being completed once. */
   schedule?: TaskSchedule;
   /**

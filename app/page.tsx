@@ -15,6 +15,7 @@ import { GamificationSection } from "@/components/marketing/gamification-section
 import { PrivacySection } from "@/components/marketing/privacy-section";
 import { TechStackSection } from "@/components/marketing/tech-stack-section";
 import { OpenSourceSection } from "@/components/marketing/open-source-section";
+import { DocsSection } from "@/components/marketing/docs-section";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { FinalCtaSection } from "@/components/marketing/final-cta-section";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -43,6 +44,7 @@ export default function LandingPage() {
       <PrivacySection />
       <TechStackSection />
       <OpenSourceSection />
+      <DocsSection />
       <FaqSection />
       <FinalCtaSection />
       <SiteFooter />

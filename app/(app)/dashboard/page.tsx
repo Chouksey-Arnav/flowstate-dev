@@ -36,6 +36,7 @@ export default function DashboardPage() {
   const completeTask = useTaskStore((s) => s.completeTask);
   const toggleTodayCompletion = useTaskStore((s) => s.toggleTodayCompletion);
   const habits = useHabitStore((s) => s.habits);
+  const toggleHabitCompletion = useHabitStore((s) => s.toggleCompletion);
   const reflectionEntries = useReflectionStore((s) => s.entries);
   const dailyGoal = useSettingsStore((s) => s.dailyGoal);
   const dailyTaskGoal = useSettingsStore((s) => s.dailyTaskGoal);
@@ -113,6 +114,15 @@ export default function DashboardPage() {
       </div>
 
       <div className="space-y-4">
+        <SectionHeading title="Habits" subtitle="Show up daily — this is what actually compounds" />
+
+        <HabitStatusRow
+          habits={[...habits].sort((a, b) => a.order - b.order)}
+          onToggle={toggleHabitCompletion}
+        />
+      </div>
+
+      <div className="space-y-4">
         <SectionHeading title="Progress" subtitle="Streaks, goals, and today's numbers" />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -137,8 +147,6 @@ export default function DashboardPage() {
         <SectionHeading title="Insights" subtitle="How the week is actually going" />
 
         <ReflectionInsightCard entries={reflectionEntries} />
-
-        <HabitStatusRow habits={[...habits].sort((a, b) => a.order - b.order)} />
 
         <WeeklyChartMini data={weeklySeries} />
       </div>

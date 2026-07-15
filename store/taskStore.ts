@@ -60,6 +60,7 @@ export const useTaskStore = create<TaskState>()(
           timesSkipped: 0,
           createdAt: new Date().toISOString(),
           xpOverride: input.xpOverride,
+          reward: input.reward,
           schedule: input.schedule,
           completions: [],
         };

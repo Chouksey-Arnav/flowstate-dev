@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Flame, Gauge, Sparkles, Target, Repeat } from "lucide-react";
+import { Flame, Gauge, Gift, Sparkles, Target, Repeat } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -71,6 +71,7 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
   const [subtasks, setSubtasks] = useState<SubTask[]>([]);
   const [customXp, setCustomXp] = useState(false);
   const [xpValue, setXpValue] = useState("20");
+  const [reward, setReward] = useState("");
   const [doNext, setDoNext] = useState(false);
   const [repeatOn, setRepeatOn] = useState(false);
   const [repeatStartDate, setRepeatStartDate] = useState(toDateKey());
@@ -88,6 +89,7 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
       setSubtasks(task?.subtasks ?? []);
       setCustomXp(typeof task?.xpOverride === "number");
       setXpValue(String(task?.xpOverride ?? xpForTaskCompletion(task?.difficulty ?? "MEDIUM", task?.priority ?? "MEDIUM")));
+      setReward(task?.reward ?? "");
       setDoNext(false);
       setRepeatOn(!!task?.schedule);
       setRepeatStartDate(task?.schedule?.startDate ?? toDateKey());
@@ -126,6 +128,7 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
       subtasks,
       tags: task?.tags ?? [],
       xpOverride: customXp ? previewXp : undefined,
+      reward: reward.trim() || undefined,
       schedule: repeatOn
         ? { startDate: repeatStartDate || toDateKey(), repeatDays: repeatDaysNumber }
         : undefined,
@@ -317,6 +320,18 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
                 <Sparkles className="h-3.5 w-3.5" /> +{previewXp} XP
               </span>
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="task-reward" className="flex items-center gap-1.5">
+              <Gift className="h-3.5 w-3.5 text-flow-yellow" /> Reward <span className="font-normal text-muted-foreground">(optional)</span>
+            </Label>
+            <Input
+              id="task-reward"
+              value={reward}
+              onChange={(e) => setReward(e.target.value)}
+              placeholder="Something for you — a coffee, an episode, 20 guilt-free minutes…"
+            />
           </div>
 
           {!task && (
