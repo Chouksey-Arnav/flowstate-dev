@@ -16,6 +16,8 @@ const LINKS = [
   { href: "#faq", label: "FAQ" },
 ];
 
+const DOCS_LINK = { href: "/docs", label: "Docs" };
+
 export function SiteNav() {
   const [open, setOpen] = useState(false);
 
@@ -33,6 +35,9 @@ export function SiteNav() {
               {link.label}
             </a>
           ))}
+          <Link href={DOCS_LINK.href} className="transition-colors hover:text-foreground">
+            {DOCS_LINK.label}
+          </Link>
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
@@ -74,6 +79,13 @@ export function SiteNav() {
                 {link.label}
               </a>
             ))}
+            <Link
+              href={DOCS_LINK.href}
+              onClick={() => setOpen(false)}
+              className="rounded-lg px-2 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
+            >
+              {DOCS_LINK.label}
+            </Link>
             <div className="mt-2 flex items-center gap-3">
               <GithubStarButton className="flex-1 justify-center" />
               <Link

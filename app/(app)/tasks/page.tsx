@@ -67,11 +67,17 @@ export default function TasksPage() {
   const totalToday = visibleTasks.length;
   const streak = calculateGoalStreak(tasks, dailyTaskGoal).current;
 
+  function completionMessage(id: string): string {
+    const line = getRandomCompletionLine();
+    const reward = tasks.find((t) => t.id === id)?.reward;
+    return reward ? `${line} Your reward: ${reward}.` : line;
+  }
+
   function handleComplete(id: string) {
     completeTask(id);
     if (confettiEnabled) fireTaskCompleteConfetti();
     if (soundEnabled) playCompletionChime();
-    setUndo({ taskId: id, message: getRandomCompletionLine() });
+    setUndo({ taskId: id, message: completionMessage(id) });
   }
 
   function handleToggleToday(id: string) {

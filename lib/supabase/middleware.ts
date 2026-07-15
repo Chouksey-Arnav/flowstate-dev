@@ -1,7 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/signup"];
+/** Paths logged-in users get bounced away from (back to /dashboard) — the marketing/auth entry points. */
+const AUTH_ENTRY_PATHS = ["/login", "/signup"];
+/** Paths anyone can view regardless of auth state, with no redirect either way. */
+const ALWAYS_PUBLIC_PREFIXES = ["/docs"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -32,15 +35,16 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isPublicPath = path === "/" || PUBLIC_PATHS.some((p) => path.startsWith(p));
+  const isAuthEntryPath = path === "/" || AUTH_ENTRY_PATHS.some((p) => path.startsWith(p));
+  const isAlwaysPublic = ALWAYS_PUBLIC_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
 
-  if (!user && !isPublicPath) {
+  if (!user && !isAuthEntryPath && !isAlwaysPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  if (user && isPublicPath) {
+  if (user && isAuthEntryPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);

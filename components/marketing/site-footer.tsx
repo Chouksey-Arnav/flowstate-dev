@@ -5,6 +5,7 @@ const LINKS = [
   { href: "#features", label: "Features" },
   { href: "#gamification", label: "Progress" },
   { href: "#privacy", label: "Privacy" },
+  { href: "/docs", label: "Docs" },
   { href: GITHUB_REPO_URL, label: "GitHub", external: true },
 ];
 

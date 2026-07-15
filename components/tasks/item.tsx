@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { GripVertical, MoreVertical, Pencil, Archive, ArchiveRestore, Trash2, Clock, Zap, Check, Timer, Target, Sparkles, Repeat } from "lucide-react";
+import { GripVertical, MoreVertical, Pencil, Archive, ArchiveRestore, Trash2, Clock, Zap, Check, Timer, Target, Sparkles, Repeat, Gift } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -182,6 +182,11 @@ export function TaskItem({
             {task.subtasks.length > 0 && (
               <span className="text-xs text-muted-foreground">
                 {subtaskDone}/{task.subtasks.length} subtasks
+              </span>
+            )}
+            {task.reward && (
+              <span className="flex max-w-[220px] items-center gap-1 truncate rounded-full border border-flow-yellow/30 bg-flow-yellow/10 px-2 py-0.5 text-xs font-medium text-flow-yellow">
+                <Gift className="h-3 w-3 shrink-0" /> <span className="truncate">{task.reward}</span>
               </span>
             )}
           </div>
