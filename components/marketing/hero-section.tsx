@@ -39,7 +39,7 @@ export function HeroSection() {
           className="inline-flex items-center gap-2 rounded-2xl border border-border bg-card px-6 py-3.5 text-base font-semibold text-foreground transition-colors hover:border-muted-foreground/40 hover:bg-secondary/60"
         >
           <Github className="h-[17px] w-[17px]" />
-          Star on GitHub
+          View on GitHub
         </a>
       </div>
       <p className="mt-4 text-[13.5px] text-muted-foreground/70">No paywall. No ads. No tracking. Your data stays yours.</p>
