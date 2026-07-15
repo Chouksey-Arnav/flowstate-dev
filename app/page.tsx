@@ -23,7 +23,7 @@ import { FirstVisitTip } from "@/components/marketing/first-visit-tip";
 export const metadata: Metadata = {
   title: "Flowstate | Open-Source Productivity Tool & Daily Planner",
   description:
-    "Flowstate is a dark, no-excuses, open-source productivity tool. Tasks, a drift-free focus timer, habits, and stats — a minimalist developer planner wired to a leveling system that scores your discipline and hunts the one task you keep avoiding.",
+    "FlowState: a dark, minimalist productivity tool with tasks, a drift-free Pomodoro timer, habits & stats. Open-source, no paywalls.",
 };
 
 export default function LandingPage() {
