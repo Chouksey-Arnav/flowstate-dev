@@ -69,3 +69,16 @@ The full documentation site lives at `/docs` (linked from the landing page nav a
 ## Deploying
 
 Vercel-ready. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as environment variables on the Vercel project (same values as `.env.local`), then push — no other server-side config needed.
+
+## Desktop app
+
+The "Get for Mac" button on the landing page ships a native desktop shell (`electron/`) — an Electron `BrowserWindow` that loads the deployed web app, so there's no separate desktop codebase to maintain. It builds to a real `.dmg`/`.exe`/`.AppImage` via `electron-builder`:
+
+```bash
+npm run electron:dev   # run the shell against your local `next dev` server
+npm run dist:mac       # build release/FlowState.dmg (must run on macOS)
+npm run dist:win       # build release/FlowState-Setup.exe
+npm run dist:linux     # build release/FlowState.AppImage
+```
+
+`.github/workflows/desktop-release.yml` builds all three platforms on their native runners and attaches the artifacts to a GitHub Release whenever a `desktop-v*` tag is pushed (or via manual dispatch) — `mac`/`win`/`dmg` builds require their native OS, which is why this can't be done from a single machine. The landing-page buttons link to `releases/latest/download/<name>`, a stable GitHub URL that always points at the newest release's asset, so no code changes are needed when cutting a new desktop release.

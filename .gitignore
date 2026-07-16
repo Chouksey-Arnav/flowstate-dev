@@ -8,6 +8,9 @@
 # production
 /build
 
+# electron-builder output
+/release
+
 # misc
 .DS_Store
 *.pem
