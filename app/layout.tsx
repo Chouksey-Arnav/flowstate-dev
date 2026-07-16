@@ -9,7 +9,7 @@ const DESCRIPTION =
   "FlowState: a dark, minimalist productivity tool with tasks, a drift-free Pomodoro timer, habits & stats. Open-source, no paywalls.";
 
 const SCHEMA_DESCRIPTION =
-  "Flowstate is a free, open-source focus app that runs the whole productivity loop in one place: task capture, a drift-free Pomodoro timer, daily habit tracking, and an XP-based leveling system that turns finished work into visible progress. Dark, distraction-free interface, no ads, no subscriptions, no premium tier — self-host it or use the hosted app.";
+  "Free, open-source productivity app: tasks, a drift-free Pomodoro timer, habit tracking, and XP-based leveling.";
 
 const JSON_LD = {
   "@context": "https://schema.org",
