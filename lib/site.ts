@@ -4,13 +4,33 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://flowstate-d
 
 // Desktop shell builds are published as GitHub release assets by
 // .github/workflows/desktop-release.yml. "latest/download/<name>" always
-// resolves to the newest release's asset, but it's a redirect (latest/download
-// -> tagged release -> signed asset URL) rather than a direct link, so it's
-// only used for direct asset downloads, never as a marketing CTA href.
-export const DESKTOP_DOWNLOAD_MAC_URL = `${GITHUB_REPO_URL}/releases/latest/download/FlowState.dmg`;
-export const DESKTOP_DOWNLOAD_WINDOWS_URL = `${GITHUB_REPO_URL}/releases/latest/download/FlowState-Setup.exe`;
-export const DESKTOP_DOWNLOAD_LINUX_URL = `${GITHUB_REPO_URL}/releases/latest/download/FlowState.AppImage`;
+// resolves to the newest release's asset, but it's a redirect
+// (latest/download -> tagged release -> signed asset URL), so it's only
+// used for direct asset downloads, never as a marketing CTA href.
+export type DesktopPlatform = "mac" | "windows" | "linux";
 
-// Non-redirecting destination for "download the desktop app" links — lets
-// visitors pick their OS and always resolves without a 3XX hop.
+export const DESKTOP_DOWNLOADS: Record<
+  DesktopPlatform,
+  { label: string; fileLabel: string; url: string }
+> = {
+  mac: {
+    label: "Mac",
+    fileLabel: ".dmg",
+    url: `${GITHUB_REPO_URL}/releases/latest/download/FlowState.dmg`,
+  },
+  windows: {
+    label: "Windows",
+    fileLabel: ".exe",
+    url: `${GITHUB_REPO_URL}/releases/latest/download/FlowState-Setup.exe`,
+  },
+  linux: {
+    label: "Linux",
+    fileLabel: ".AppImage",
+    url: `${GITHUB_REPO_URL}/releases/latest/download/FlowState.AppImage`,
+  },
+};
+
+// Non-redirecting destination for "see all releases" links — "releases/latest"
+// itself 302s to the tagged release, so this points at the bare releases
+// index instead, which resolves without a 3XX hop.
 export const DESKTOP_RELEASES_URL = `${GITHUB_REPO_URL}/releases`;
