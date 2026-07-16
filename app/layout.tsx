@@ -8,6 +8,24 @@ const TITLE = "Flowstate | Open-Source Productivity Tool & Daily Planner";
 const DESCRIPTION =
   "FlowState: a dark, minimalist productivity tool with tasks, a drift-free Pomodoro timer, habits & stats. Open-source, no paywalls.";
 
+const SCHEMA_DESCRIPTION =
+  "Flowstate is a free, open-source focus app that runs the whole productivity loop in one place: task capture, a drift-free Pomodoro timer, daily habit tracking, and an XP-based leveling system that turns finished work into visible progress. Dark, distraction-free interface, no ads, no subscriptions, no premium tier — self-host it or use the hosted app.";
+
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Flowstate",
+  url: SITE_URL,
+  applicationCategory: "ProductivityApplication",
+  operatingSystem: "Any (runs in the browser)",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+  description: SCHEMA_DESCRIPTION,
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -64,6 +82,10 @@ export default function RootLayout({
     >
       <head>
         <meta name="google-site-verification" content="a9mcHzp3WMoyiHEXm7ZT1ab-Vkj_XDrEQuEFMZ-7-oY" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+        />
       </head>
       <body className="bg-zinc-950 text-zinc-300 font-sans antialiased">
         {children}
