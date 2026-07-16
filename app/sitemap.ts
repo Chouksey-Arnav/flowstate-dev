@@ -6,7 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
   return [
     {
-      url: `${SITE_URL}/`,
+      url: SITE_URL,
       lastModified,
     },
     {

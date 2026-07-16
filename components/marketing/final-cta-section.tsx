@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Apple } from "lucide-react";
-import { DESKTOP_DOWNLOAD_MAC_URL } from "@/lib/site";
+import { DESKTOP_RELEASES_URL } from "@/lib/site";
 
 export function FinalCtaSection() {
   return (
@@ -22,7 +22,7 @@ export function FinalCtaSection() {
           <ArrowRight className="h-[18px] w-[18px]" />
         </Link>
         <a
-          href={DESKTOP_DOWNLOAD_MAC_URL}
+          href={DESKTOP_RELEASES_URL}
           className="inline-flex items-center gap-2 rounded-2xl border border-border bg-card px-7 py-4 text-base font-bold text-foreground transition-colors hover:border-muted-foreground/40 hover:bg-secondary/60 sm:text-[17px]"
         >
           <Apple className="h-[18px] w-[18px]" />

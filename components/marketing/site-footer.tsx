@@ -6,6 +6,7 @@ const LINKS = [
   { href: "#gamification", label: "Progress" },
   { href: "#privacy", label: "Privacy" },
   { href: "/docs", label: "Docs" },
+  { href: "/signup", label: "Sign up" },
   { href: GITHUB_REPO_URL, label: "GitHub", external: true },
 ];
 
