@@ -33,6 +33,16 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: npm run ${{ matrix.script }}
+        env:
+          # Only used by the macos-latest job; harmless no-ops elsewhere.
+          # Set these 5 repo secrets to sign+notarize the .dmg — see the
+          # comment atop electron-builder.js for how to obtain them. Until
+          # they're set, CSC_LINK is empty and the build stays unsigned.
+          CSC_LINK: ${{ secrets.MAC_CERTIFICATE_P12_BASE64 }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.version != ''
         uses: softprops/action-gh-release@v2

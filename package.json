@@ -59,37 +59,5 @@
     "tailwindcss": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.4.0"
-  },
-  "build": {
-    "appId": "dev.flowstate.desktop",
-    "productName": "FlowState",
-    "files": [
-      "electron/main.js",
-      "electron/preload.js",
-      "package.json"
-    ],
-    "directories": {
-      "output": "release",
-      "buildResources": "electron/build"
-    },
-    "mac": {
-      "category": "public.app-category.productivity",
-      "target": [
-        {
-          "target": "dmg",
-          "arch": ["universal"]
-        }
-      ],
-      "artifactName": "FlowState.${ext}"
-    },
-    "win": {
-      "target": ["nsis"],
-      "artifactName": "FlowState-Setup.${ext}"
-    },
-    "linux": {
-      "target": ["AppImage"],
-      "category": "Office",
-      "artifactName": "FlowState.${ext}"
-    }
   }
 }
