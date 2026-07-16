@@ -2,10 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { DOC_CATEGORIES, DOCS } from "@/lib/docs";
+import { SITE_URL } from "@/lib/site";
+
+const TITLE = "Documentation";
+const DESCRIPTION = "Everything FlowState does, documented: tasks, focus, habits, stats, rewards, XP, settings, and privacy.";
 
 export const metadata: Metadata = {
-  title: "Documentation",
-  description: "Everything FlowState does, documented: tasks, focus, habits, stats, rewards, XP, settings, and privacy.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: {
+    canonical: `${SITE_URL}/docs`,
+  },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: `${SITE_URL}/docs`,
+  },
 };
 
 export default function DocsIndexPage() {
