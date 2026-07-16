@@ -1,6 +1,8 @@
 {
   "name": "flowstate",
   "version": "0.1.0",
+  "description": "A dark-themed, no-excuses anti-procrastination productivity app.",
+  "author": "FlowState",
   "private": true,
   "main": "electron/main.js",
   "scripts": {
@@ -67,7 +69,8 @@
       "package.json"
     ],
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "electron/build"
     },
     "mac": {
       "category": "public.app-category.productivity",

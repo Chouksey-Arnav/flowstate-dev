@@ -6,6 +6,8 @@ const path = require("path");
 // FLOWSTATE_URL at a local dev server while working on the shell itself.
 const APP_URL = process.env.FLOWSTATE_URL || "https://flowstate-dev.vercel.app";
 
+const ICON_PATH = path.join(__dirname, "build", "icon.png");
+
 let mainWindow;
 
 function createWindow() {
@@ -16,6 +18,9 @@ function createWindow() {
     minHeight: 640,
     backgroundColor: "#0a0a0f",
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
+    // Packaged builds get their icon from electron-builder; this covers the
+    // taskbar/dock icon when running unpackaged via `npm run electron:dev`.
+    icon: ICON_PATH,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
