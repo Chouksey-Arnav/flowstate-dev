@@ -2,13 +2,20 @@
   "name": "flowstate",
   "version": "0.1.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "postbuild": "node scripts/indexnow-ping.mjs",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "electron:dev": "FLOWSTATE_URL=http://localhost:3000 electron .",
+    "electron:start": "electron .",
+    "dist:mac": "electron-builder --mac --publish never",
+    "dist:win": "electron-builder --win --publish never",
+    "dist:linux": "electron-builder --linux --publish never",
+    "dist": "electron-builder --mac --win --linux --publish never"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.0.4",
@@ -44,9 +51,42 @@
     "autoprefixer": "^10.4.19",
     "eslint": "^8",
     "eslint-config-next": "^14.2.0",
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.4.0"
+  },
+  "build": {
+    "appId": "dev.flowstate.desktop",
+    "productName": "FlowState",
+    "files": [
+      "electron/main.js",
+      "electron/preload.js",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["universal"]
+        }
+      ],
+      "artifactName": "FlowState.${ext}"
+    },
+    "win": {
+      "target": ["nsis"],
+      "artifactName": "FlowState-Setup.${ext}"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "category": "Office",
+      "artifactName": "FlowState.${ext}"
+    }
   }
 }

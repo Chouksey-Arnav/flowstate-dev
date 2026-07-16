@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, Github, Sparkles } from "lucide-react";
-import { GITHUB_REPO_URL } from "@/lib/site";
+import { ArrowRight, Apple, Github, Sparkles } from "lucide-react";
+import { DESKTOP_DOWNLOAD_MAC_URL, GITHUB_REPO_URL } from "@/lib/site";
 
 export function HeroSection() {
   return (
@@ -32,6 +32,13 @@ export function HeroSection() {
           Try the live app
           <ArrowRight className="h-4 w-4" />
         </Link>
+        <a
+          href={DESKTOP_DOWNLOAD_MAC_URL}
+          className="inline-flex items-center gap-2 rounded-2xl border border-border bg-card px-6 py-3.5 text-base font-semibold text-foreground transition-colors hover:border-muted-foreground/40 hover:bg-secondary/60"
+        >
+          <Apple className="h-[17px] w-[17px]" />
+          Get for Mac
+        </a>
         <a
           href={GITHUB_REPO_URL}
           target="_blank"
