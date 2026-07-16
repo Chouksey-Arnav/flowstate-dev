@@ -82,3 +82,17 @@ npm run dist:linux     # build release/FlowState.AppImage
 ```
 
 `.github/workflows/desktop-release.yml` builds all three platforms on their native runners and attaches the artifacts to a GitHub Release whenever a `desktop-v*` tag is pushed (or via manual dispatch) — `mac`/`win`/`dmg` builds require their native OS, which is why this can't be done from a single machine. The landing-page buttons link to `releases/latest/download/<name>`, a stable GitHub URL that always points at the newest release's asset, so no code changes are needed when cutting a new desktop release.
+
+### Code signing (removing the macOS "Apple could not verify" warning)
+
+Unsigned, the `.dmg` triggers Gatekeeper's "not opened" warning on first launch — expected until the app is signed with an Apple Developer ID certificate and notarized. `electron-builder.js` and the release workflow already support this; it's disabled only because the credentials aren't present. To turn it on, add these 5 repo secrets (Settings → Secrets and variables → Actions), all sourced from a paid [Apple Developer Program](https://developer.apple.com/programs/) membership:
+
+| Secret | What it is |
+| --- | --- |
+| `MAC_CERTIFICATE_P12_BASE64` | Base64-encoded `.p12` export of a "Developer ID Application" certificate (Keychain Access → export) |
+| `MAC_CERTIFICATE_PASSWORD` | The password set when exporting that `.p12` |
+| `APPLE_ID` | The Apple ID email enrolled in the Developer Program |
+| `APPLE_APP_SPECIFIC_PASSWORD` | An app-specific password for that Apple ID, generated at appleid.apple.com |
+| `APPLE_TEAM_ID` | Your 10-character Developer Team ID |
+
+Once all 5 are set, the next desktop-release run signs and notarizes the `.dmg` automatically — no code changes needed. Without them, it builds unsigned exactly as it does today.
