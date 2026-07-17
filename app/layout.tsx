@@ -8,22 +8,19 @@ const TITLE = "Flowstate | Open-Source Productivity Tool & Daily Planner";
 const DESCRIPTION =
   "FlowState: a dark, minimalist productivity tool with tasks, a drift-free Pomodoro timer, habits & stats. Open-source, no paywalls.";
 
-const SCHEMA_DESCRIPTION =
-  "Free, open-source productivity app: tasks, a drift-free Pomodoro timer, habit tracking, and XP-based leveling.";
-
 const JSON_LD = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   name: "Flowstate",
-  url: SITE_URL,
-  applicationCategory: "ProductivityApplication",
-  operatingSystem: "Any (runs in the browser)",
+  operatingSystem: "All",
+  applicationCategory: "BusinessApplication",
   offers: {
     "@type": "Offer",
     price: "0",
     priceCurrency: "USD",
   },
-  description: SCHEMA_DESCRIPTION,
+  description:
+    "An open-source, minimalist productivity web application designed to help you maintain deep focus and optimize your daily workflows.",
 };
 
 export const metadata: Metadata = {
