@@ -12,7 +12,9 @@ import {
   SlidersHorizontal,
   ShieldCheck,
   Ban,
+  Monitor,
 } from "lucide-react";
+import { DESKTOP_INSTALL_INSTRUCTIONS } from "@/lib/desktop-install";
 
 export interface DocCategory {
   key: string;
@@ -77,6 +79,40 @@ export const DOCS: DocPage[] = [
         paragraphs: [
           "If you're new, read Accounts & Sync to understand how your data is stored, then Dashboard to see how the pieces come together on the page you'll open every day.",
         ],
+      },
+    ],
+  },
+  {
+    slug: "installing-the-desktop-app",
+    category: "start",
+    icon: Monitor,
+    title: "Installing the Desktop App",
+    description: "Getting the Mac, Windows, or Linux download past the first-launch security warning.",
+    readTime: "2 min",
+    sections: [
+      {
+        heading: "Why there's a warning at all",
+        paragraphs: [
+          "FlowState's desktop app isn't code-signed by a paid Apple/Microsoft developer certificate, so each OS shows its standard first-launch warning for unsigned software — this is expected, not a sign anything is wrong with the download.",
+        ],
+      },
+      {
+        heading: DESKTOP_INSTALL_INSTRUCTIONS.mac.title,
+        paragraphs: [DESKTOP_INSTALL_INSTRUCTIONS.mac.intro],
+        steps: DESKTOP_INSTALL_INSTRUCTIONS.mac.steps,
+        note: `Run: ${DESKTOP_INSTALL_INSTRUCTIONS.mac.command}`,
+      },
+      {
+        heading: DESKTOP_INSTALL_INSTRUCTIONS.windows.title,
+        paragraphs: [DESKTOP_INSTALL_INSTRUCTIONS.windows.intro],
+        steps: DESKTOP_INSTALL_INSTRUCTIONS.windows.steps,
+        note: `PowerShell command: ${DESKTOP_INSTALL_INSTRUCTIONS.windows.command}`,
+      },
+      {
+        heading: DESKTOP_INSTALL_INSTRUCTIONS.linux.title,
+        paragraphs: [DESKTOP_INSTALL_INSTRUCTIONS.linux.intro],
+        steps: DESKTOP_INSTALL_INSTRUCTIONS.linux.steps,
+        note: `Run: ${DESKTOP_INSTALL_INSTRUCTIONS.linux.command}`,
       },
     ],
   },
