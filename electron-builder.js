@@ -25,7 +25,7 @@ const hasSigningIdentity = Boolean(process.env.CSC_LINK);
 module.exports = {
   appId: "dev.flowstate.desktop",
   productName: "FlowState",
-  files: ["electron/main.js", "electron/preload.js", "package.json"],
+  files: ["electron/main.js", "electron/preload.js", "electron/offline.html", "package.json"],
   directories: {
     output: "release",
     buildResources: "electron/build",

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>You're offline | Flowstate</title>
+    <style>
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: #09090b;
+        color: #d4d4d8;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      .wrap {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 24px;
+      }
+      h1 { font-size: 1.25rem; margin-bottom: 8px; color: #fafafa; }
+      p { color: #a1a1aa; max-width: 28rem; }
+      button {
+        margin-top: 20px;
+        background: #fafafa;
+        color: #09090b;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>You're offline</h1>
+      <p>Flowstate couldn't reach the network and this page hasn't been cached yet. Pages you've already visited stay available offline.</p>
+      <button onclick="location.reload()">Try again</button>
+    </div>
+  </body>
+</html>

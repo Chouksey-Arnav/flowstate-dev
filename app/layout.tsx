@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { SITE_URL } from "@/lib/site";
+import { PwaRegister } from "@/components/pwa-register";
 import "./globals.css";
 
 const TITLE = "Flowstate | Open-Source Productivity Tool & Daily Planner";
@@ -41,6 +42,7 @@ export const metadata: Metadata = {
     "habit tracker",
   ],
   authors: [{ name: "Flowstate" }],
+  manifest: "/manifest.json",
   alternates: {
     canonical: SITE_URL,
   },
@@ -67,6 +69,10 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#09090b",
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -85,6 +91,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-zinc-950 text-zinc-300 font-sans antialiased">
+        <PwaRegister />
         {children}
       </body>
     </html>
