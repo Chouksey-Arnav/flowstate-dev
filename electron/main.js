@@ -4,7 +4,12 @@ const path = require("path");
 // The desktop app is a thin native shell around the deployed FlowState web
 // app — there's no separate desktop codebase to keep in sync. Point
 // FLOWSTATE_URL at a local dev server while working on the shell itself.
-const APP_URL = process.env.FLOWSTATE_URL || "https://flowstate-dev.vercel.app";
+const BASE_URL = (process.env.FLOWSTATE_URL || "https://flowstate-dev.vercel.app").replace(/\/+$/, "");
+// Load /login instead of the marketing homepage: the desktop app has no use
+// for the landing page, and middleware.ts already bounces a signed-in
+// visitor from /login straight to /dashboard, so this lands authenticated
+// users on the dashboard and everyone else on the login/signup screen.
+const APP_URL = `${BASE_URL}/login`;
 
 const ICON_PATH = path.join(__dirname, "build", "icon.png");
 
@@ -25,6 +30,11 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       preload: path.join(__dirname, "preload.js"),
+      // Named + persistent: session cookies (Supabase auth) are written to
+      // disk under this partition and survive app restarts, force-quits,
+      // and OS reboots — same "stay signed in" behavior as a browser,
+      // since login state lives in cookies the account website also uses.
+      partition: "persist:flowstate",
     },
   });
 
