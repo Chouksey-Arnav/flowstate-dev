@@ -40,6 +40,14 @@ function createWindow() {
 
   mainWindow.loadURL(APP_URL);
 
+  // If the remote app fails to load (no network and nothing cached yet by
+  // the service worker from a previous online session), fall back to a
+  // bundled local page instead of Electron's default net-error screen.
+  mainWindow.webContents.on("did-fail-load", (_event, errorCode) => {
+    if (errorCode === -3) return; // ERR_ABORTED, e.g. a superseded navigation
+    mainWindow.loadFile(path.join(__dirname, "offline.html"));
+  });
+
   // Open target="_blank" links (e.g. the GitHub link) in the OS browser
   // instead of a second app window.
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {

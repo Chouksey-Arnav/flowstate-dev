@@ -11,7 +11,6 @@ import { useTaskStore } from "@/store/taskStore";
 import { useReflectionStore } from "@/store/reflectionStore";
 import { PomodoroWidget } from "@/components/focus/pomodoro-widget";
 import { SessionTaskPicker } from "@/components/focus/session-task-picker";
-import { VideoGrid } from "@/components/focus/video-grid";
 import { MotivationVideos } from "@/components/focus/motivation-videos";
 import { FullFocusMode } from "@/components/focus/full-focus-mode";
 import { AmbientSoundControl } from "@/components/focus/ambient-sound-control";
@@ -111,8 +110,6 @@ export default function FocusPage() {
         volume={ambientVolume}
         onVolumeChange={setAmbientVolume}
       />
-
-      <VideoGrid />
 
       <MotivationVideos />
 
