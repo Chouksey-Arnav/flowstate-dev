@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTaskStore } from "@/store/taskStore";
+import { toDateKey } from "@/lib/dates";
 
 export function QuickAddButton() {
   const [open, setOpen] = useState(false);
@@ -13,7 +14,7 @@ export function QuickAddButton() {
 
   function handleSubmit() {
     if (!title.trim()) return;
-    addTask({ title: title.trim(), category: "Other", priority: "MEDIUM" });
+    addTask({ title: title.trim(), category: "Other", priority: "MEDIUM", dueDate: toDateKey() });
     setTitle("");
     setOpen(false);
   }

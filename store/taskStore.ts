@@ -5,9 +5,9 @@ import type { Task, SubTask, Difficulty } from "@/types";
 import { generateId } from "@/lib/id";
 import { getNextOrder, isTaskCompletedOn } from "@/lib/tasks";
 import { toDateKey } from "@/lib/dates";
-import { xpForTask, DAILY_GOAL_BONUS_XP } from "@/lib/xp";
+import { xpForTask, xpForPerfectDay } from "@/lib/xp";
+import { isPerfectDayComplete, calculatePerfectDayStreak } from "@/lib/streaks";
 import { useXpStore } from "./xpStore";
-import { useSettingsStore } from "./settingsStore";
 
 interface TaskState {
   tasks: Task[];
@@ -79,25 +79,25 @@ export const useTaskStore = create<TaskState>()(
       completeTask: (id) => {
         const task = get().tasks.find((t) => t.id === id);
         if (!task || task.status === "completed") return;
+
+        const todayKey = toDateKey();
+        const wasPerfectBefore = isPerfectDayComplete(get().tasks, todayKey);
+
         set((state) => ({
           tasks: state.tasks.map((t) =>
             t.id === id ? { ...t, status: "completed", completedAt: new Date().toISOString() } : t
           ),
         }));
 
-        useXpStore.getState().awardXp(
-          xpForTask(task),
-          "task",
-          `Completed "${task.title}"`
-        );
+        useXpStore.getState().awardXp(xpForTask(task), "task", `Completed "${task.title}"`);
 
-        const todayKey = toDateKey();
-        const completedToday = get().tasks.filter(
-          (t) => t.completedAt && toDateKey(new Date(t.completedAt)) === todayKey
-        ).length;
-        const goal = useSettingsStore.getState().dailyTaskGoal;
-        if (goal > 0 && completedToday === goal) {
-          useXpStore.getState().awardXp(DAILY_GOAL_BONUS_XP, "dailyGoal", "Hit today's task goal!");
+        if (!wasPerfectBefore && isPerfectDayComplete(get().tasks, todayKey)) {
+          const streak = calculatePerfectDayStreak(get().tasks);
+          useXpStore.getState().awardXp(
+            xpForPerfectDay(streak.current),
+            "perfectDay",
+            "Perfect day — everything due today, done!"
+          );
         }
       },
 
@@ -107,10 +107,8 @@ export const useTaskStore = create<TaskState>()(
 
         const todayKey = toDateKey();
         const wasCompletedToday = !!task.completedAt && toDateKey(new Date(task.completedAt)) === todayKey;
-        const goal = useSettingsStore.getState().dailyTaskGoal;
-        const completedTodayBeforeUndo = get().tasks.filter(
-          (t) => t.completedAt && toDateKey(new Date(t.completedAt)) === todayKey
-        ).length;
+        const wasPerfectBefore = isPerfectDayComplete(get().tasks, todayKey);
+        const streakBefore = calculatePerfectDayStreak(get().tasks);
 
         set((state) => ({
           tasks: state.tasks.map((t) =>
@@ -120,8 +118,12 @@ export const useTaskStore = create<TaskState>()(
 
         useXpStore.getState().revokeXp(xpForTask(task), "task", `Unchecked "${task.title}"`);
 
-        if (wasCompletedToday && goal > 0 && completedTodayBeforeUndo === goal) {
-          useXpStore.getState().revokeXp(DAILY_GOAL_BONUS_XP, "dailyGoal", "Lost today's task goal bonus");
+        if (wasCompletedToday && wasPerfectBefore) {
+          useXpStore.getState().revokeXp(
+            xpForPerfectDay(streakBefore.current),
+            "perfectDay",
+            "Lost today's perfect-day bonus"
+          );
         }
       },
 
@@ -129,8 +131,9 @@ export const useTaskStore = create<TaskState>()(
         const task = get().tasks.find((t) => t.id === id);
         if (!task) return;
         const wasDone = isTaskCompletedOn(task, dateKey);
-        const completedTodayBefore = get().tasks.filter((t) => isTaskCompletedOn(t, dateKey)).length;
-        const goal = useSettingsStore.getState().dailyTaskGoal;
+        const asOf = new Date(`${dateKey}T00:00:00`);
+        const wasPerfectBefore = isPerfectDayComplete(get().tasks, dateKey);
+        const streakBefore = calculatePerfectDayStreak(get().tasks, asOf);
 
         set((state) => ({
           tasks: state.tasks.map((t) => {
@@ -144,19 +147,25 @@ export const useTaskStore = create<TaskState>()(
 
         if (wasDone) {
           useXpStore.getState().revokeXp(xpForTask(task), "task", `Unchecked "${task.title}"`);
-          if (goal > 0 && completedTodayBefore === goal) {
-            useXpStore.getState().revokeXp(DAILY_GOAL_BONUS_XP, "dailyGoal", "Lost today's task goal bonus");
+          if (wasPerfectBefore) {
+            useXpStore.getState().revokeXp(
+              xpForPerfectDay(streakBefore.current),
+              "perfectDay",
+              "Lost today's perfect-day bonus"
+            );
           }
           return;
         }
 
         useXpStore.getState().awardXp(xpForTask(task), "task", `Completed "${task.title}"`);
 
-        if (goal > 0) {
-          const completedToday = get().tasks.filter((t) => isTaskCompletedOn(t, dateKey)).length;
-          if (completedToday === goal) {
-            useXpStore.getState().awardXp(DAILY_GOAL_BONUS_XP, "dailyGoal", "Hit today's task goal!");
-          }
+        if (!wasPerfectBefore && isPerfectDayComplete(get().tasks, dateKey)) {
+          const streak = calculatePerfectDayStreak(get().tasks, asOf);
+          useXpStore.getState().awardXp(
+            xpForPerfectDay(streak.current),
+            "perfectDay",
+            "Perfect day — everything due today, done!"
+          );
         }
       },
 

@@ -19,9 +19,10 @@ function intensityClass(count: number): string {
 
 interface HeatmapProps {
   tasks: Task[];
+  perfectDayKeys: Set<string>;
 }
 
-export function Heatmap({ tasks }: HeatmapProps) {
+export function Heatmap({ tasks, perfectDayKeys }: HeatmapProps) {
   const [monthDate, setMonthDate] = useState(() => startOfMonth(new Date()));
   const days = getMonthHeatmap(tasks, monthDate);
   const leadingBlanks = getDay(monthDate); // 0 = Sunday
@@ -43,20 +44,28 @@ export function Heatmap({ tasks }: HeatmapProps) {
       <CardContent>
         <div className="grid grid-cols-7 gap-1.5">
           {Array.from({ length: leadingBlanks }).map((_, i) => <div key={`blank-${i}`} />)}
-          {days.map((day) => (
-            <div
-              key={day.dateKey}
-              title={`${day.dateKey}: ${day.count} completed`}
-              className={cn(
-                "flex aspect-square items-center justify-center rounded-sm text-[10px] text-foreground/70",
-                intensityClass(day.count),
-                day.dateKey === todayKey && "ring-1 ring-inset ring-primary"
-              )}
-            >
-              {Number(day.dateKey.slice(-2))}
-            </div>
-          ))}
+          {days.map((day) => {
+            const perfect = perfectDayKeys.has(day.dateKey);
+            return (
+              <div
+                key={day.dateKey}
+                title={`${day.dateKey}: ${day.count} completed${perfect ? " — Perfect Day" : ""}`}
+                className={cn(
+                  "flex aspect-square items-center justify-center rounded-sm text-[10px] text-foreground/70",
+                  intensityClass(day.count),
+                  perfect && "ring-2 ring-inset ring-flow-yellow",
+                  !perfect && day.dateKey === todayKey && "ring-1 ring-inset ring-primary"
+                )}
+              >
+                {Number(day.dateKey.slice(-2))}
+              </div>
+            );
+          })}
         </div>
+        <p className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <span className="inline-block h-2.5 w-2.5 rounded-sm ring-2 ring-inset ring-flow-yellow" />
+          Gold ring = Perfect Day — everything due that day, done.
+        </p>
       </CardContent>
     </Card>
   );

@@ -7,17 +7,18 @@ export interface GoalStatus {
 }
 
 /**
- * How urgently to warn about today's goal, based on the clock, not just the
- * task count — the same "2 tasks left" means very different things at 10am
- * vs 10pm, and the messaging should escalate accordingly (but only after the
- * goal is actually missed for the day, never before).
+ * How urgently to warn about today's Perfect Day, based on the clock, not
+ * just the task count — the same "2 tasks left" means very different things
+ * at 10am vs 10pm, and the messaging should escalate accordingly (but only
+ * after the day is actually at risk, never before). `totalDueToday` is the
+ * count of tasks due today (see `getTasksDueOn`), not an arbitrary goal.
  */
-export function getGoalStatus(completedToday: number, goal: number, now: Date = new Date()): GoalStatus {
-  const tasksRemaining = Math.max(0, goal - completedToday);
+export function getGoalStatus(completedToday: number, totalDueToday: number, now: Date = new Date()): GoalStatus {
+  const tasksRemaining = Math.max(0, totalDueToday - completedToday);
   const minutesLeftToday = 24 * 60 - (now.getHours() * 60 + now.getMinutes());
   const hoursRemaining = Math.max(0, Math.round((minutesLeftToday / 60) * 10) / 10);
 
-  if (goal <= 0 || tasksRemaining === 0) {
+  if (totalDueToday <= 0 || tasksRemaining === 0) {
     return { tier: "met", tasksRemaining: 0, hoursRemaining };
   }
 

@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useTaskStore } from "@/store/taskStore";
 import { XpBar } from "@/components/gamification/xp-bar";
+import { calculatePerfectDayStreak } from "@/lib/streaks";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -29,7 +30,10 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
-  const activeTaskCount = useTaskStore((s) => s.tasks.filter((t) => t.status === "active").length);
+  const tasks = useTaskStore((s) => s.tasks);
+  const hasHydrated = useTaskStore((s) => s.hasHydrated);
+  const activeTaskCount = tasks.filter((t) => t.status === "active").length;
+  const streak = hasHydrated ? calculatePerfectDayStreak(tasks).current : 0;
 
   return (
     <aside
@@ -80,6 +84,20 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      {streak > 0 && (
+        <div
+          className={cn(
+            "flex items-center gap-1.5 border-t border-border/60 px-3 py-2.5 text-flow-yellow",
+            collapsed && "justify-center px-0"
+          )}
+          title={`${streak}-day Perfect Day streak`}
+        >
+          <Flame className="h-4 w-4 shrink-0" fill="currentColor" />
+          <span className="text-sm font-bold tabular-nums">{streak}</span>
+          {!collapsed && <span className="text-xs font-medium text-muted-foreground">day streak</span>}
+        </div>
+      )}
 
       <div className="border-t border-border/60">
         <XpBar collapsed={collapsed} />

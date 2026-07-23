@@ -84,7 +84,7 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
       setCategory(task?.category ?? "Other");
       setPriority(task?.priority ?? "MEDIUM");
       setDifficulty(task?.difficulty ?? "MEDIUM");
-      setDueDate(task?.dueDate ?? "");
+      setDueDate(task ? task.dueDate ?? "" : toDateKey());
       setEstimatedMinutes(task?.estimatedMinutes ? String(task.estimatedMinutes) : "");
       setSubtasks(task?.subtasks ?? []);
       setCustomXp(typeof task?.xpOverride === "number");
@@ -278,6 +278,13 @@ export function TaskFormDialog({ open, onOpenChange, task }: TaskFormDialogProps
                 disabled={repeatOn}
                 placeholder={repeatOn ? "Not used for repeating tasks" : undefined}
               />
+              {!repeatOn && (
+                <p className="text-xs text-muted-foreground">
+                  {dueDate
+                    ? "Counts toward that day's streak — clear the field to make it a someday/backlog task."
+                    : "No due date — won't count toward any day's streak."}
+                </p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="task-minutes">Estimated minutes</Label>

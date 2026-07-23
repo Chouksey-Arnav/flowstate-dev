@@ -6,6 +6,7 @@ import { PomodoroEngine } from "@/components/layout/pomodoro-engine";
 import { PomodoroStatusPill } from "@/components/layout/pomodoro-status-pill";
 import { XpToastStack } from "@/components/gamification/xp-toast-stack";
 import { LevelUpModal } from "@/components/gamification/level-up-modal";
+import { StreakMilestoneModal } from "@/components/gamification/streak-milestone-modal";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +14,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <PomodoroEngine />
       <PomodoroStatusPill />
       <XpToastStack />
+      <StreakMilestoneModal />
       <LevelUpModal />
       <div className="flex min-h-screen">
         <Sidebar />

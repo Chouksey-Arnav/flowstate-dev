@@ -6,7 +6,6 @@ import type { Settings } from "@/types";
 const DEFAULT_SETTINGS: Settings = {
   name: "",
   dailyGoal: "",
-  dailyTaskGoal: 3,
   pomodoroWork: 25,
   pomodoroBreak: 5,
   pomodoroLongBreak: 15,
@@ -49,6 +48,6 @@ export const useSettingsStore = create<SettingsState>()(
 );
 
 export function getSettingsSnapshot(state: SettingsState): Settings {
-  const { name, dailyGoal, dailyTaskGoal, pomodoroWork, pomodoroBreak, pomodoroLongBreak, soundEnabled, confettiEnabled, ambientSound, timerSoundType, autoStartNext, firstDayOfWeek } = state;
-  return { name, dailyGoal, dailyTaskGoal, pomodoroWork, pomodoroBreak, pomodoroLongBreak, soundEnabled, confettiEnabled, ambientSound, timerSoundType, autoStartNext, firstDayOfWeek };
+  const { name, dailyGoal, pomodoroWork, pomodoroBreak, pomodoroLongBreak, soundEnabled, confettiEnabled, ambientSound, timerSoundType, autoStartNext, firstDayOfWeek } = state;
+  return { name, dailyGoal, pomodoroWork, pomodoroBreak, pomodoroLongBreak, soundEnabled, confettiEnabled, ambientSound, timerSoundType, autoStartNext, firstDayOfWeek };
 }

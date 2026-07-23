@@ -25,8 +25,8 @@ export function MotivationVideos() {
           Three 60-second hits from Dan Martell. Watch one before you start — kill the excuse, then get to work.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <CardContent className="px-3 sm:px-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {MOTIVATION_VIDEOS.map((v) => (
             <VideoEmbed key={v.id} videoId={v.id} title={v.title} />
           ))}

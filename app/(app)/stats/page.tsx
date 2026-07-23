@@ -5,12 +5,14 @@ import { useTaskStore } from "@/store/taskStore";
 import { useHabitStore } from "@/store/habitStore";
 import { useFocusStore } from "@/store/focusStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useStreakStore } from "@/store/streakStore";
 import { StatCard } from "@/components/stats/stat-card";
 import { CategoryDonut } from "@/components/stats/category-donut";
 import { WeeklyBarChart } from "@/components/stats/weekly-bar-chart";
 import { Heatmap } from "@/components/stats/heatmap";
+import { BadgeCase } from "@/components/stats/badge-case";
 import { getCompletedTasks } from "@/lib/tasks";
-import { calculateGoalStreak } from "@/lib/streaks";
+import { calculatePerfectDayStreak, getPerfectDayKeys } from "@/lib/streaks";
 import {
   getTotalFocusMinutes,
   getHabitCompletionRate,
@@ -23,10 +25,11 @@ export default function StatsPage() {
   const habits = useHabitStore((s) => s.habits);
   const sessions = useFocusStore((s) => s.sessions);
   const firstDayOfWeek = useSettingsStore((s) => s.firstDayOfWeek);
-  const dailyTaskGoal = useSettingsStore((s) => s.dailyTaskGoal);
+  const earnedBadgeIds = useStreakStore((s) => s.earnedBadgeIds);
 
   const completedTasks = getCompletedTasks(tasks);
-  const streak = calculateGoalStreak(tasks, dailyTaskGoal);
+  const streak = calculatePerfectDayStreak(tasks);
+  const perfectDayKeys = getPerfectDayKeys(tasks);
   const totalFocusMinutes = getTotalFocusMinutes(sessions);
   const habitRate = getHabitCompletionRate(habits, 30);
   const categoryBreakdown = getCategoryBreakdown(tasks);
@@ -44,7 +47,7 @@ export default function StatsPage() {
           value={`${Math.floor(totalFocusMinutes / 60)}h ${totalFocusMinutes % 60}m`}
         />
         <StatCard icon={Repeat} label="Habit rate (30d)" value={`${habitRate}%`} />
-        <StatCard icon={Flame} label="Task streak" value={`${streak.current}d`} hint={`Best: ${streak.best}d`} />
+        <StatCard icon={Flame} label="Perfect Day streak" value={`${streak.current}d`} hint={`Best: ${streak.best}d`} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -52,7 +55,9 @@ export default function StatsPage() {
         <CategoryDonut data={categoryBreakdown} />
       </div>
 
-      <Heatmap tasks={tasks} />
+      <BadgeCase earnedBadgeIds={earnedBadgeIds} currentStreak={streak.current} />
+
+      <Heatmap tasks={tasks} perfectDayKeys={perfectDayKeys} />
     </div>
   );
 }
