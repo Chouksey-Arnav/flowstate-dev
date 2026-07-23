@@ -14,11 +14,11 @@ interface StreakWarningBannerProps {
 
 const COPY: Partial<Record<GoalUrgency, { title: (t: number) => string; icon: typeof AlarmClock }>> = {
   nudge: {
-    title: (t) => `${t} task${t === 1 ? "" : "s"} left to hit today's goal.`,
+    title: (t) => `${t} task${t === 1 ? "" : "s"} left for a perfect day.`,
     icon: AlarmClock,
   },
   warning: {
-    title: (t) => `Still ${t} task${t === 1 ? "" : "s"} short of today's goal — the day's running out.`,
+    title: (t) => `Still ${t} task${t === 1 ? "" : "s"} short of a perfect day — the day's running out.`,
     icon: TriangleAlert,
   },
   critical: {

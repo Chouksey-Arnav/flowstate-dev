@@ -81,7 +81,13 @@ export function BrainDumpReviewDialog({ open, drafts, onOpenChange, onCommitted 
       return;
     }
     const created = rows.map((r) =>
-      addTask({ title: r.title.trim(), category: r.category, priority: r.priority, difficulty: r.difficulty })
+      addTask({
+        title: r.title.trim(),
+        category: r.category,
+        priority: r.priority,
+        difficulty: r.difficulty,
+        dueDate: toDateKey(),
+      })
     );
 
     if (nextId) {

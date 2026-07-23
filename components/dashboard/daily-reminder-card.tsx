@@ -6,6 +6,7 @@ import { AlarmClock, ArrowRight, PartyPopper, Plus, SunMedium } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTaskStore } from "@/store/taskStore";
+import { toDateKey } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 
 interface DailyReminderCardProps {
@@ -36,7 +37,7 @@ export function DailyReminderCard({ totalToday, completedToday, hour = new Date(
 
   function submitQuickTask() {
     if (!title.trim()) return;
-    addTask({ title: title.trim(), category: "Other", priority: "MEDIUM" });
+    addTask({ title: title.trim(), category: "Other", priority: "MEDIUM", dueDate: toDateKey() });
     setTitle("");
     setAdding(false);
   }

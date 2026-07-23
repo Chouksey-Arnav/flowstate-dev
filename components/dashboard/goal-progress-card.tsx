@@ -1,17 +1,15 @@
 "use client";
 
-import { Minus, Plus, Target } from "lucide-react";
+import { Target } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { GoalUrgency } from "@/lib/dailyGoal";
 
 interface GoalProgressCardProps {
   completedToday: number;
-  goal: number;
+  totalToday: number;
   tier: GoalUrgency;
-  onChangeGoal: (goal: number) => void;
 }
 
 const TIER_STYLES: Record<GoalUrgency, { bar: string; ring: string }> = {
@@ -22,43 +20,22 @@ const TIER_STYLES: Record<GoalUrgency, { bar: string; ring: string }> = {
   critical: { bar: "bg-flow-red", ring: "border-flow-red/40" },
 };
 
-export function GoalProgressCard({ completedToday, goal, tier, onChangeGoal }: GoalProgressCardProps) {
-  const pct = goal === 0 ? 0 : Math.min(100, Math.round((completedToday / goal) * 100));
+/** Progress toward today's Perfect Day — every task due today, checked off. No editable target: the day sets its own bar. */
+export function GoalProgressCard({ completedToday, totalToday, tier }: GoalProgressCardProps) {
+  const pct = totalToday === 0 ? 0 : Math.min(100, Math.round((completedToday / totalToday) * 100));
   const styles = TIER_STYLES[tier];
 
   return (
     <Card className={cn("transition-colors", styles.ring)}>
       <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Target className="h-4 w-4" />
-            <span className="text-xs">Today&apos;s task goal</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => onChangeGoal(Math.max(1, goal - 1))}
-              aria-label="Lower goal"
-            >
-              <Minus className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => onChangeGoal(Math.min(20, goal + 1))}
-              aria-label="Raise goal"
-            >
-              <Plus className="h-3 w-3" />
-            </Button>
-          </div>
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Target className="h-4 w-4" />
+          <span className="text-xs">Due today</span>
         </div>
 
         <p className="mt-2 text-2xl font-semibold text-foreground">
           {completedToday}
-          <span className="text-muted-foreground">/{goal}</span>
+          <span className="text-muted-foreground">/{totalToday}</span>
         </p>
 
         <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-secondary">
@@ -71,7 +48,11 @@ export function GoalProgressCard({ completedToday, goal, tier, onChangeGoal }: G
         </div>
 
         <p className="mt-1.5 text-xs text-muted-foreground">
-          {tier === "met" ? "Goal hit — streak protected today." : `${pct}% of today's goal`}
+          {totalToday === 0
+            ? "Nothing due today — add a task to put today on the board."
+            : tier === "met"
+              ? "Perfect day — streak protected."
+              : `${pct}% of today cleared`}
         </p>
       </CardContent>
     </Card>

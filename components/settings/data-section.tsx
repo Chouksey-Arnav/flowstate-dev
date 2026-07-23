@@ -11,6 +11,7 @@ import { useFocusStore } from "@/store/focusStore";
 import { useSettingsStore, getSettingsSnapshot } from "@/store/settingsStore";
 import { useReflectionStore } from "@/store/reflectionStore";
 import { useBlockerStore } from "@/store/blockerStore";
+import { useStreakStore } from "@/store/streakStore";
 import { buildExportPayload, downloadJson } from "@/lib/export";
 
 type ActiveDialog = "clearCompleted" | "resetHabits" | "resetEverything" | null;
@@ -93,6 +94,7 @@ export function DataSection() {
           useSettingsStore.getState().resetAll();
           useReflectionStore.getState().resetAll();
           useBlockerStore.getState().resetAll();
+          useStreakStore.getState().resetAll();
         }}
       />
     </Card>

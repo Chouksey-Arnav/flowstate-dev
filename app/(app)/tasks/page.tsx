@@ -22,7 +22,7 @@ import { useReflectionStore } from "@/store/reflectionStore";
 import { getActiveTasks, getTodaysTasks, filterTasks, sortTasks, reorderTasks, getFocusPick, isTaskCompletedOn } from "@/lib/tasks";
 import { fireTaskCompleteConfetti } from "@/lib/confetti";
 import { playCompletionChime } from "@/lib/audio";
-import { calculateGoalStreak } from "@/lib/streaks";
+import { calculatePerfectDayStreak, getTasksDueOn } from "@/lib/streaks";
 import { toDateKey } from "@/lib/dates";
 import { getRandomCompletionLine } from "@/lib/quotes";
 import type { Task, TaskFilters, SortBy } from "@/types";
@@ -41,7 +41,6 @@ export default function TasksPage() {
 
   const soundEnabled = useSettingsStore((s) => s.soundEnabled);
   const confettiEnabled = useSettingsStore((s) => s.confettiEnabled);
-  const dailyTaskGoal = useSettingsStore((s) => s.dailyTaskGoal);
   const addReflection = useReflectionStore((s) => s.addEntry);
 
   const [filters, setFilters] = useState<TaskFilters>({});
@@ -63,9 +62,10 @@ export default function TasksPage() {
 
   const focusPick = getFocusPick(tasks, skippedFocusId) ?? getFocusPick(tasks);
 
-  const completedToday = tasks.filter((t) => isTaskCompletedOn(t, todayKey)).length;
-  const totalToday = visibleTasks.length;
-  const streak = calculateGoalStreak(tasks, dailyTaskGoal).current;
+  const dueToday = getTasksDueOn(tasks, todayKey);
+  const completedToday = dueToday.filter((t) => isTaskCompletedOn(t, todayKey)).length;
+  const totalToday = dueToday.length;
+  const streak = calculatePerfectDayStreak(tasks).current;
 
   function completionMessage(id: string): string {
     const line = getRandomCompletionLine();

@@ -86,8 +86,6 @@ export type FirstDayOfWeek = "sunday" | "monday";
 export interface Settings {
   name: string;
   dailyGoal: string;
-  /** Number of tasks you need to complete today to keep your streak alive. */
-  dailyTaskGoal: number;
   pomodoroWork: number; // minutes
   pomodoroBreak: number;
   pomodoroLongBreak: number;
@@ -146,7 +144,7 @@ export interface BlockerSchedule {
   days: number[]; // 0 (Sun) - 6 (Sat)
 }
 
-export type XpSource = "task" | "habit" | "focus" | "dailyGoal";
+export type XpSource = "task" | "habit" | "focus" | "perfectDay" | "milestone";
 
 export interface XpEvent {
   id: string;

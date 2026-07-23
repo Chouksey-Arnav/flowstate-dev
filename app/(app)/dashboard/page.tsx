@@ -4,6 +4,7 @@ import { useTaskStore } from "@/store/taskStore";
 import { useHabitStore } from "@/store/habitStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useReflectionStore } from "@/store/reflectionStore";
+import { useStreakStore } from "@/store/streakStore";
 import { Greeting } from "@/components/dashboard/greeting";
 import { DateCounter } from "@/components/dashboard/date-counter";
 import { DailyReminderCard } from "@/components/dashboard/daily-reminder-card";
@@ -19,12 +20,13 @@ import { CommitmentCard } from "@/components/dashboard/commitment-card";
 import { AvoidedTasksCard } from "@/components/dashboard/avoided-tasks-card";
 import { ReflectionInsightCard } from "@/components/dashboard/reflection-insight-card";
 import { TodayProgressCard } from "@/components/dashboard/today-progress-card";
+import { NextBadgeStrip } from "@/components/dashboard/next-badge-strip";
 import { HabitStatusRow } from "@/components/dashboard/habit-status-row";
 import { WeeklyChartMini } from "@/components/dashboard/weekly-chart-mini";
 import { QuickAddButton } from "@/components/dashboard/quick-add-button";
 import { SectionHeading } from "@/components/dashboard/section-heading";
-import { getTopTasks, getActiveTasks, getAvoidedTasks, getTodaysTasks, isTaskCompletedOn } from "@/lib/tasks";
-import { calculateGoalStreak } from "@/lib/streaks";
+import { getTopTasks, getActiveTasks, getAvoidedTasks, isTaskCompletedOn } from "@/lib/tasks";
+import { calculatePerfectDayStreak, getTasksDueOn } from "@/lib/streaks";
 import { getGoalStatus } from "@/lib/dailyGoal";
 import { getWeeklySeries } from "@/lib/stats";
 import { getDashboardQuote } from "@/lib/quotes";
@@ -39,26 +41,27 @@ export default function DashboardPage() {
   const toggleHabitCompletion = useHabitStore((s) => s.toggleCompletion);
   const reflectionEntries = useReflectionStore((s) => s.entries);
   const dailyGoal = useSettingsStore((s) => s.dailyGoal);
-  const dailyTaskGoal = useSettingsStore((s) => s.dailyTaskGoal);
   const name = useSettingsStore((s) => s.name);
   const firstDayOfWeek = useSettingsStore((s) => s.firstDayOfWeek);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const commitTaskId = useSettingsStore((s) => s.commitTaskId);
   const commitDate = useSettingsStore((s) => s.commitDate);
   const setCommitment = useSettingsStore((s) => s.setCommitment);
+  const earnedBadgeIds = useStreakStore((s) => s.earnedBadgeIds);
 
   const now = useNowTick();
 
   const activeTasks = getActiveTasks(tasks);
   const topTasks = getTopTasks(tasks, 3);
   const avoidedTasks = getAvoidedTasks(tasks, 3);
-  const streak = calculateGoalStreak(tasks, dailyTaskGoal, now);
+  const streak = calculatePerfectDayStreak(tasks, now);
   const weeklySeries = getWeeklySeries(tasks, firstDayOfWeek);
 
   const todayKey = toDateKey();
-  const completedToday = tasks.filter((t) => isTaskCompletedOn(t, todayKey)).length;
-  const totalToday = getTodaysTasks(tasks, todayKey).length;
-  const goalStatus = getGoalStatus(completedToday, dailyTaskGoal, now);
+  const dueToday = getTasksDueOn(tasks, todayKey);
+  const completedToday = dueToday.filter((t) => isTaskCompletedOn(t, todayKey)).length;
+  const totalToday = dueToday.length;
+  const goalStatus = getGoalStatus(completedToday, totalToday, now);
 
   const isCommittedToday = commitDate === todayKey && !!commitTaskId;
   const committedTask = tasks.find((t) => t.id === commitTaskId);
@@ -129,11 +132,12 @@ export default function DashboardPage() {
           <StreakCard current={streak.current} best={streak.best} />
           <GoalProgressCard
             completedToday={completedToday}
-            goal={dailyTaskGoal}
+            totalToday={totalToday}
             tier={goalStatus.tier}
-            onChangeGoal={(goal) => updateSettings({ dailyTaskGoal: goal })}
           />
         </div>
+
+        <NextBadgeStrip currentStreak={streak.current} earnedBadgeIds={earnedBadgeIds} />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TodayProgressCard completedToday={completedToday} totalToday={totalToday} />

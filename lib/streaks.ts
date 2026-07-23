@@ -1,5 +1,5 @@
 import { toDateKey, daysAgoKey } from "./dates";
-import { completionDateKeys } from "./tasks";
+import { isTaskCompletedOn, isScheduleActiveOn, addDaysToKey } from "./tasks";
 import type { Task } from "@/types";
 
 export interface Streak {
@@ -7,42 +7,64 @@ export interface Streak {
   best: number;
 }
 
-export function getCompletedDateKeys(tasks: Task[]): Set<string> {
-  const keys = new Set<string>();
-  for (const t of tasks) {
-    for (const key of completionDateKeys(t)) keys.add(key);
-  }
-  return keys;
-}
-
-export function calculateTaskStreak(tasks: Task[], today: Date = new Date()): Streak {
-  return calculateStreakFromDateSet(getCompletedDateKeys(tasks), today);
-}
-
-/** How many tasks were completed on each date, keyed by local date key. */
-export function getDailyCompletionCounts(tasks: Task[]): Map<string, number> {
-  const counts = new Map<string, number>();
-  for (const t of tasks) {
-    for (const key of completionDateKeys(t)) {
-      counts.set(key, (counts.get(key) ?? 0) + 1);
-    }
-  }
-  return counts;
+/**
+ * Tasks that count toward a given calendar day's Perfect Day requirement:
+ * due exactly that day, or a recurring task active that day. Archived
+ * tasks never count, including for the day they were archived.
+ */
+export function getTasksDueOn(tasks: Task[], dateKey: string): Task[] {
+  return tasks.filter((t) => {
+    if (t.status === "archived") return false;
+    if (t.schedule) return isScheduleActiveOn(t.schedule, dateKey);
+    return t.dueDate === dateKey;
+  });
 }
 
 /**
- * The real streak: only days where you hit your daily task goal count,
- * not just "did something." This is what should drive streak UI and warnings.
+ * Every calendar date (YYYY-MM-DD) that qualifies as a Perfect Day: at
+ * least one task was due, and every task due that day was checked off on
+ * that exact day. A day with nothing due is never a Perfect Day — no free
+ * streak. This reads each task's actual historical `dueDate`, so it's
+ * immutable once the day has passed: completing something late doesn't
+ * retroactively rescue an earlier day.
  */
-export function calculateGoalStreak(tasks: Task[], dailyGoal: number, today: Date = new Date()): Streak {
-  if (dailyGoal <= 0) return calculateTaskStreak(tasks, today);
-  const counts = getDailyCompletionCounts(tasks);
-  const metDays = new Set(
-    Array.from(counts.entries())
-      .filter(([, count]) => count >= dailyGoal)
-      .map(([key]) => key)
-  );
-  return calculateStreakFromDateSet(metDays, today);
+export function getPerfectDayKeys(tasks: Task[]): Set<string> {
+  const dueByDay = new Map<string, Task[]>();
+  for (const t of tasks) {
+    if (t.status === "archived") continue;
+    if (t.schedule) {
+      for (let offset = 0; offset < Math.max(1, t.schedule.repeatDays); offset++) {
+        pushToMap(dueByDay, addDaysToKey(t.schedule.startDate, offset), t);
+      }
+    } else if (t.dueDate) {
+      pushToMap(dueByDay, t.dueDate, t);
+    }
+  }
+
+  const perfectDays = new Set<string>();
+  for (const [dateKey, dueTasks] of dueByDay) {
+    if (dueTasks.length > 0 && dueTasks.every((t) => isTaskCompletedOn(t, dateKey))) {
+      perfectDays.add(dateKey);
+    }
+  }
+  return perfectDays;
+}
+
+function pushToMap(map: Map<string, Task[]>, key: string, task: Task): void {
+  const list = map.get(key);
+  if (list) list.push(task);
+  else map.set(key, [task]);
+}
+
+/** Whether a specific day is (so far) a Perfect Day — everything due, done. */
+export function isPerfectDayComplete(tasks: Task[], dateKey: string): boolean {
+  const due = getTasksDueOn(tasks, dateKey);
+  return due.length > 0 && due.every((t) => isTaskCompletedOn(t, dateKey));
+}
+
+/** The headline streak: consecutive Perfect Days, unforgiving — no freezes, no grace period. */
+export function calculatePerfectDayStreak(tasks: Task[], today: Date = new Date()): Streak {
+  return calculateStreakFromDateSet(getPerfectDayKeys(tasks), today);
 }
 
 /**
