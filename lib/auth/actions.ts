@@ -1,9 +1,28 @@
-import { createClient } from "@/lib/supabase/client";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 export interface AuthResult {
   ok: boolean;
   error?: string;
   username?: string;
+}
+
+const MOCK_USER_COOKIE = "flowstate_mock_user";
+
+function setMockUserCookie(username: string) {
+  if (typeof document === "undefined") return;
+  const maxAge = 60 * 60 * 24 * 30; // 30 days
+  document.cookie = `${MOCK_USER_COOKIE}=${encodeURIComponent(username)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+}
+
+function getMockUserCookie(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${MOCK_USER_COOKIE}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function removeMockUserCookie() {
+  if (typeof document === "undefined") return;
+  document.cookie = `${MOCK_USER_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
 }
 
 /** Strips an optional leading "@" and surrounding whitespace for validation/requests. */
@@ -25,6 +44,16 @@ export function usernameFormatError(raw: string): string | null {
 export async function checkUsernameAvailable(raw: string): Promise<boolean | null> {
   const clean = normalizeUsernameInput(raw);
   if (!USERNAME_PATTERN.test(clean)) return null;
+
+  if (!isSupabaseConfigured) {
+    // In mock mode, check against the current mock user cookie
+    const current = getMockUserCookie();
+    if (current && current.toLowerCase() === clean.toLowerCase()) {
+      return true;
+    }
+    return true;
+  }
+
   const supabase = createClient();
   const { data, error } = await supabase.rpc("flowstate_username_available", {
     check_username: `@${clean}`,
@@ -34,9 +63,16 @@ export async function checkUsernameAvailable(raw: string): Promise<boolean | nul
 }
 
 export async function signUp(rawUsername: string, password: string): Promise<AuthResult> {
+  const username = normalizeUsernameInput(rawUsername);
+
+  if (!isSupabaseConfigured) {
+    setMockUserCookie(username);
+    return { ok: true, username };
+  }
+
   const supabase = createClient();
   const { data, error } = await supabase.functions.invoke("flowstate-signup", {
-    body: { username: normalizeUsernameInput(rawUsername), password },
+    body: { username, password },
   });
 
   if (error || !data?.session) {
@@ -53,9 +89,16 @@ export async function signUp(rawUsername: string, password: string): Promise<Aut
 }
 
 export async function logIn(rawUsername: string, password: string): Promise<AuthResult> {
+  const username = normalizeUsernameInput(rawUsername);
+
+  if (!isSupabaseConfigured) {
+    setMockUserCookie(username);
+    return { ok: true, username };
+  }
+
   const supabase = createClient();
   const { data, error } = await supabase.functions.invoke("flowstate-login", {
-    body: { username: normalizeUsernameInput(rawUsername), password },
+    body: { username, password },
   });
 
   if (error || !data?.session) {
@@ -72,14 +115,26 @@ export async function logIn(rawUsername: string, password: string): Promise<Auth
 }
 
 export async function logOut(): Promise<void> {
+  if (!isSupabaseConfigured) {
+    removeMockUserCookie();
+    return;
+  }
+
   const supabase = createClient();
   await supabase.auth.signOut();
 }
 
 export async function changeUsername(rawUsername: string): Promise<AuthResult> {
+  const username = normalizeUsernameInput(rawUsername);
+
+  if (!isSupabaseConfigured) {
+    setMockUserCookie(username);
+    return { ok: true, username };
+  }
+
   const supabase = createClient();
   const { data, error } = await supabase.functions.invoke("flowstate-change-username", {
-    body: { username: normalizeUsernameInput(rawUsername) },
+    body: { username },
   });
 
   if (error || !data?.username) {
@@ -90,6 +145,10 @@ export async function changeUsername(rawUsername: string): Promise<AuthResult> {
 }
 
 export async function getCurrentUsername(): Promise<string | null> {
+  if (!isSupabaseConfigured) {
+    return getMockUserCookie();
+  }
+
   const supabase = createClient();
   const {
     data: { user },

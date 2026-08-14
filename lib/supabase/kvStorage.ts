@@ -1,5 +1,5 @@
 import type { StateStorage } from "zustand/middleware";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 const TABLE = "flowstate_kv";
 const DEBOUNCE_MS = 400;
@@ -7,35 +7,60 @@ const DEBOUNCE_MS = 400;
 const pendingWrites = new Map<string, ReturnType<typeof setTimeout>>();
 
 /**
- * Zustand `persist` storage backed by Supabase instead of localStorage, so
- * every store (tasks, habits, focus sessions, settings, xp, reflections,
- * blocker prefs) syncs across devices under the logged-in account. Reads
- * and writes are scoped to the current user purely by RLS — there is no
- * user_id filtering here because an unauthenticated or wrong-user request
- * simply can't see other rows.
- *
- * Writes are debounced per key so rapid-fire updates (e.g. typing in a
- * settings field) collapse into one round trip instead of one per keystroke.
+ * Zustand `persist` storage backed by Supabase when configured, or falling
+ * back to browser localStorage when Supabase environment variables are missing.
  */
 export const supabaseKvStorage: StateStorage = {
   async getItem(name: string): Promise<string | null> {
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return null;
+    if (!isSupabaseConfigured) {
+      if (typeof window !== "undefined") {
+        return window.localStorage.getItem(name);
+      }
+      return null;
+    }
 
-    const { data, error } = await supabase
-      .from(TABLE)
-      .select("value")
-      .eq("key", name)
-      .maybeSingle();
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        // Fallback to local storage if user not logged into Supabase
+        if (typeof window !== "undefined") {
+          return window.localStorage.getItem(name);
+        }
+        return null;
+      }
 
-    if (error || !data) return null;
-    return JSON.stringify(data.value);
+      const { data, error } = await supabase
+        .from(TABLE)
+        .select("value")
+        .eq("key", name)
+        .maybeSingle();
+
+      if (error || !data) {
+        if (typeof window !== "undefined") {
+          return window.localStorage.getItem(name);
+        }
+        return null;
+      }
+      return JSON.stringify(data.value);
+    } catch {
+      if (typeof window !== "undefined") {
+        return window.localStorage.getItem(name);
+      }
+      return null;
+    }
   },
 
   setItem(name: string, value: string): void {
+    if (!isSupabaseConfigured) {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(name, value);
+      }
+      return;
+    }
+
     const existingTimer = pendingWrites.get(name);
     if (existingTimer) clearTimeout(existingTimer);
 
@@ -43,30 +68,63 @@ export const supabaseKvStorage: StateStorage = {
       name,
       setTimeout(async () => {
         pendingWrites.delete(name);
-        const supabase = createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) return;
+        try {
+          const supabase = createClient();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          if (!user) {
+            if (typeof window !== "undefined") {
+              window.localStorage.setItem(name, value);
+            }
+            return;
+          }
 
-        await supabase
-          .from(TABLE)
-          .upsert({ user_id: user.id, key: name, value: JSON.parse(value) }, { onConflict: "user_id,key" });
+          const { error } = await supabase
+            .from(TABLE)
+            .upsert({ user_id: user.id, key: name, value: JSON.parse(value) }, { onConflict: "user_id,key" });
+
+          if (error && typeof window !== "undefined") {
+            window.localStorage.setItem(name, value);
+          }
+        } catch {
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem(name, value);
+          }
+        }
       }, DEBOUNCE_MS)
     );
   },
 
   async removeItem(name: string): Promise<void> {
+    if (!isSupabaseConfigured) {
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem(name);
+      }
+      return;
+    }
+
     const existingTimer = pendingWrites.get(name);
     if (existingTimer) clearTimeout(existingTimer);
     pendingWrites.delete(name);
 
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem(name);
+        }
+        return;
+      }
 
-    await supabase.from(TABLE).delete().eq("key", name);
+      await supabase.from(TABLE).delete().eq("key", name);
+    } catch {
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem(name);
+      }
+    }
   },
 };
