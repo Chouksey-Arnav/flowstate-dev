@@ -1,13 +1,17 @@
 # FlowState
 
-A dark-themed, no-excuses anti-procrastination productivity app. Tasks, a Pomodoro focus timer, habits, stats, and a dashboard that ties them together — all running entirely in your browser.
+[![Status](https://img.shields.io/badge/Status-Production-success)](https://flowstate.app)
+
+A dark-themed, no-excuses anti-procrastination productivity app. Tasks, a Pomodoro focus timer, habits, stats, and a dashboard that ties them together — all running in your browser.
+
+> **Status Update**: FlowState is officially in **Production Status**! We are preparing for a live presentation on **September 10th**.
 
 ## Stack
 
 - **Next.js 14** (App Router) + **TypeScript**
 - **Tailwind CSS v3** with hand-written shadcn-style UI primitives (Radix UI under the hood)
 - **Zustand** with `persist` for state, seven independent domain stores (tasks, habits, focus sessions, settings, xp, reflections, blocker prefs) — persisted to Supabase instead of localStorage, see below
-- **Supabase** (Postgres + Auth + Edge Functions) for accounts and cross-device sync
+- **Supabase** (Postgres + Auth + Edge Functions) for accounts and cross-device sync. Running on/upgrading to **Supabase Pro** plan to support production workload and reliability for our live presentation.
 - **Recharts** for the weekly bar chart and category donut
 - **Framer Motion** for page transitions and list animations
 - **Web Audio API** for all timer/completion/ambient sounds — synthesized client-side, no audio files or third-party embeds
@@ -23,7 +27,7 @@ Under the hood:
 - **Signup / login / username change** run through three Supabase Edge Functions (`flowstate-signup`, `flowstate-login`, `flowstate-change-username`) rather than the browser, so the service-role key needed to create accounts and resolve usernames never touches client code.
 - **App data** (tasks, habits, focus sessions, settings, XP, reflections, blocker prefs) is stored in a Postgres table (`flowstate_kv`) as one JSON row per store per account, gated by row-level security so a user can only ever read or write their own rows. Each Zustand store's `persist` middleware points at this table instead of `localStorage`, so the existing store code barely changed.
 - The **live-running Pomodoro timer state** intentionally stays in `localStorage` — it's per-device, per-tab UI state, not account data worth syncing.
-- All of this lives in a `flowstate_`-prefixed schema inside a shared Supabase project, isolated from that project's other, unrelated tables.
+- All of this lives in a `flowstate_`-prefixed schema inside a Supabase project (operating on Supabase Pro plan), isolated from that project's other, unrelated tables.
 
 Use Settings → Export data as JSON to back up your data locally at any time.
 
@@ -66,9 +70,17 @@ Responsive down to mobile widths: the sidebar collapses below `md` in favor of a
 
 The full documentation site lives at `/docs` (linked from the landing page nav and footer) — a dedicated write-up for every tool: Tasks, Rewards, Focus, Habits, Stats, Gamification & XP, the Site Blocker, Settings & Data, Accounts & Sync, and Privacy & Self-Hosting. It's public regardless of login state, unlike the rest of the app.
 
-## Deploying
+## Deploying & Infrastructure
 
-Vercel-ready. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as environment variables on the Vercel project (same values as `.env.local`), then push — no other server-side config needed.
+> **Note on Infrastructure**: We have completely transitioned off Vercel and are no longer using Vercel. All Vercel CI checks, deployments, and imports have been removed.
+
+FlowState is deployed in production using **Coolify** hosted on a self-managed VPS.
+
+To deploy via Coolify:
+1. Connect your repository to Coolify.
+2. Configure build settings for Next.js Node server deployment (or Nixpacks / Docker build).
+3. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as environment variables.
+4. Deploy the application.
 
 ## Desktop app
 

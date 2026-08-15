@@ -1,6 +1,6 @@
 # Flowstate
 
-> An open-source, minimalist productivity web application designed to help users maintain deep focus and optimize daily workflows.
+> An open-source, minimalist productivity web application designed to help users maintain deep focus and optimize daily workflows. Operating in Production Status in preparation for live presentation on September 10th.
 
 ## Key Features
 - **Flow-inducing Workspace:** Minimal distraction, clean interface.
@@ -9,9 +9,10 @@
 
 ## Technical Stack
 - Framework: Next.js
-- Deployment: Vercel
+- Database & Auth: Supabase (Supabase Pro plan)
+- Deployment: Coolify on VPS (Fully off Vercel)
 - Codebase: Open-source
 
 ## Key Links
-- [Homepage](https://flowstate-dev.vercel.app/)
-- [Sitemap](https://flowstate-dev.vercel.app/sitemap.xml)
+- [Homepage](https://flowstate.app/)
+- [Sitemap](https://flowstate.app/sitemap.xml)
