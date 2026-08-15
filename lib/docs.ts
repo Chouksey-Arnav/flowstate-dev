@@ -507,7 +507,7 @@ export const DOCS: DocPage[] = [
         steps: [
           "git clone the repository and run npm install.",
           "Create a .env.local with your own NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.",
-          "Run npm run dev, or npm run build && npm start for production — the project deploys cleanly to Vercel with the same two environment variables.",
+          "Run npm run dev, or npm run build && npm start for production — the project is deployed using Coolify on a VPS (we are completely off Vercel) with the same environment variables.",
         ],
       },
       {

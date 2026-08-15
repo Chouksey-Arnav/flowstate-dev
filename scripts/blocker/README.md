@@ -1,9 +1,8 @@
 # FlowState site blocker
 
-FlowState is a web app — it runs in your browser, which by design has no
-access to your operating system's network settings. It can't reach out and
-block a site on your computer for you. What it *can* do is generate a real,
-local blocker script for you to install once.
+[![Status](https://img.shields.io/badge/Status-Production-success)](https://flowstate.app)
+
+FlowState is a web app running in production (deployed via Coolify on a VPS). It runs in your browser, which by design has no access to your operating system's network settings. It can't reach out and block a site on your computer for you. What it *can* do is generate a real, local blocker script for you to install once.
 
 ## Recommended: generate your personal script from the app
 
