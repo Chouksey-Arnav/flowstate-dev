@@ -66,6 +66,10 @@ Responsive down to mobile widths: the sidebar collapses below `md` in favor of a
 
 The full documentation site lives at `/docs` (linked from the landing page nav and footer) — a dedicated write-up for every tool: Tasks, Rewards, Focus, Habits, Stats, Gamification & XP, the Site Blocker, Settings & Data, Accounts & Sync, and Privacy & Self-Hosting. It's public regardless of login state, unlike the rest of the app.
 
+For developer and AI agent navigation through the codebase:
+- **[NAVIGATION.md](./NAVIGATION.md)** — Token-optimized repository map and quick feature-to-file directory.
+- **[CLAUDE.md](./CLAUDE.md)** — Core engineering guidelines, design principles, and command cheat sheet for AI agents.
+
 ## Deploying
 
 Vercel-ready. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as environment variables on the Vercel project (same values as `.env.local`), then push — no other server-side config needed.
