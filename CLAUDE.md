@@ -4,7 +4,11 @@ Guidance for Claude Code, Jules, and other AI agents working in this repository.
 
 ## 🧭 Fast Navigation & Repository Architecture
 
-For a complete map of all repository files, routes, Zustand state stores, UI components, and business logic organized by feature, consult **[`NAVIGATION.md`](./NAVIGATION.md)**. Always check `NAVIGATION.md` first to locate exact files for feature updates and save token usage.
+For fast orientation and minimum token usage:
+- **[`NAVIGATION.md`](./NAVIGATION.md)** — Architectural navigation guide and component matrix.
+- **[`AGENT_INDEX.md`](./AGENT_INDEX.md)** — Token-optimized, line-by-line file manifest and Task-to-File Action Matrix for AI agents.
+
+Always check `NAVIGATION.md` or `AGENT_INDEX.md` first to locate exact target files before scanning the filesystem.
 
 ---
 
