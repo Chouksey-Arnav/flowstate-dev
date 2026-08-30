@@ -91,6 +91,7 @@ export interface Settings {
   pomodoroLongBreak: number;
   soundEnabled: boolean;
   confettiEnabled: boolean;
+  desktopNotificationsEnabled: boolean;
   ambientSound: AmbientSound;
   timerSoundType: TimerSoundType;
   autoStartNext: boolean;

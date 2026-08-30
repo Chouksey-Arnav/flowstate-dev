@@ -11,6 +11,7 @@ const DEFAULT_SETTINGS: Settings = {
   pomodoroLongBreak: 15,
   soundEnabled: true,
   confettiEnabled: true,
+  desktopNotificationsEnabled: true,
   ambientSound: "none",
   timerSoundType: "bell",
   autoStartNext: false,
@@ -48,6 +49,6 @@ export const useSettingsStore = create<SettingsState>()(
 );
 
 export function getSettingsSnapshot(state: SettingsState): Settings {
-  const { name, dailyGoal, pomodoroWork, pomodoroBreak, pomodoroLongBreak, soundEnabled, confettiEnabled, ambientSound, timerSoundType, autoStartNext, firstDayOfWeek } = state;
-  return { name, dailyGoal, pomodoroWork, pomodoroBreak, pomodoroLongBreak, soundEnabled, confettiEnabled, ambientSound, timerSoundType, autoStartNext, firstDayOfWeek };
+  const { name, dailyGoal, pomodoroWork, pomodoroBreak, pomodoroLongBreak, soundEnabled, confettiEnabled, desktopNotificationsEnabled, ambientSound, timerSoundType, autoStartNext, firstDayOfWeek } = state;
+  return { name, dailyGoal, pomodoroWork, pomodoroBreak, pomodoroLongBreak, soundEnabled, confettiEnabled, desktopNotificationsEnabled, ambientSound, timerSoundType, autoStartNext, firstDayOfWeek };
 }
