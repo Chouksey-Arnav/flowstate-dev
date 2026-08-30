@@ -10,6 +10,7 @@ import type { FirstDayOfWeek } from "@/types";
 export function BehaviorSection() {
   const soundEnabled = useSettingsStore((s) => s.soundEnabled);
   const confettiEnabled = useSettingsStore((s) => s.confettiEnabled);
+  const desktopNotificationsEnabled = useSettingsStore((s) => s.desktopNotificationsEnabled);
   const autoStartNext = useSettingsStore((s) => s.autoStartNext);
   const firstDayOfWeek = useSettingsStore((s) => s.firstDayOfWeek);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
@@ -42,6 +43,16 @@ export function BehaviorSection() {
             id="auto-start-next"
             checked={autoStartNext}
             onCheckedChange={(v) => updateSettings({ autoStartNext: v })}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="desktop-notifications">
+            Notify when a Pomodoro phase ends
+          </Label>
+          <Switch
+            id="desktop-notifications"
+            checked={desktopNotificationsEnabled}
+            onCheckedChange={(v) => updateSettings({ desktopNotificationsEnabled: v })}
           />
         </div>
         <div className="space-y-1.5">

@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { useSettingsStore } from "./settingsStore";
 import { useFocusStore } from "./focusStore";
 import { playBeep } from "@/lib/audio";
+import { notifyPomodoroPhaseComplete } from "@/lib/notify";
 
 export type PomodoroPhase = "work" | "break" | "longBreak";
 
@@ -130,6 +131,8 @@ function completePhase(
   const nextPhase: PomodoroPhase =
     finishedPhase === "work" ? (nextCycles % 4 === 0 ? "longBreak" : "break") : "work";
   const durations = getDurations();
+
+  notifyPomodoroPhaseComplete(finishedPhase, nextPhase);
 
   if (settings.autoStartNext) {
     const now = Date.now();
