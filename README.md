@@ -68,6 +68,7 @@ The full documentation site lives at `/docs` (linked from the landing page nav a
 
 For developer and AI agent navigation through the codebase:
 - **[NAVIGATION.md](./NAVIGATION.md)** — Token-optimized repository map and quick feature-to-file directory.
+- **[AGENT_INDEX.md](./AGENT_INDEX.md)** — Ultra-dense line-by-line file manifest and Task-to-File Action Matrix for AI agents.
 - **[CLAUDE.md](./CLAUDE.md)** — Core engineering guidelines, design principles, and command cheat sheet for AI agents.
 
 ## Deploying
