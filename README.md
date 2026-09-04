@@ -6,7 +6,7 @@ A dark-themed, no-excuses anti-procrastination productivity app. Tasks, a Pomodo
 
 - **Next.js 14** (App Router) + **TypeScript**
 - **Tailwind CSS v3** with hand-written shadcn-style UI primitives (Radix UI under the hood)
-- **Zustand** with `persist` for state, seven independent domain stores (tasks, habits, focus sessions, settings, xp, reflections, blocker prefs) — persisted to Supabase instead of localStorage, see below
+- **Zustand** with `persist` for state, eight independent domain stores (tasks, habits, focus sessions, settings, xp, reflections, blocker prefs, accountability ledger) — persisted to Supabase instead of localStorage, see below
 - **Supabase** (Postgres + Auth + Edge Functions) for accounts and cross-device sync
 - **Recharts** for the weekly bar chart and category donut
 - **Framer Motion** for page transitions and list animations
@@ -21,7 +21,7 @@ Under the hood:
 
 - **Auth**: Supabase Auth. Since Supabase's auth system is keyed on email, each account gets an internal, never-shown synthetic email (`<uuid>@flowstate.internal`) that the username maps to — password hashing, sessions, and JWTs are all handled by Supabase.
 - **Signup / login / username change** run through three Supabase Edge Functions (`flowstate-signup`, `flowstate-login`, `flowstate-change-username`) rather than the browser, so the service-role key needed to create accounts and resolve usernames never touches client code.
-- **App data** (tasks, habits, focus sessions, settings, XP, reflections, blocker prefs) is stored in a Postgres table (`flowstate_kv`) as one JSON row per store per account, gated by row-level security so a user can only ever read or write their own rows. Each Zustand store's `persist` middleware points at this table instead of `localStorage`, so the existing store code barely changed.
+- **App data** (tasks, habits, focus sessions, settings, XP, reflections, blocker prefs, accountability ledger) is stored in a Postgres table (`flowstate_kv`) as one JSON row per store per account, gated by row-level security so a user can only ever read or write their own rows. Each Zustand store's `persist` middleware points at this table instead of `localStorage`, so the existing store code barely changed.
 - The **live-running Pomodoro timer state** intentionally stays in `localStorage` — it's per-device, per-tab UI state, not account data worth syncing.
 - All of this lives in a `flowstate_`-prefixed schema inside a shared Supabase project, isolated from that project's other, unrelated tables.
 
@@ -58,13 +58,14 @@ npm run build       # production build
 - **Focus** — a drift-free Pomodoro timer (work/break/long-break), an SVG ring display, a session log, a "Watch all" lofi video grid, a distraction-free Full Focus Mode, and ambient sound (lofi/rain/white/brown noise, all synthesized).
 - **Habits** — weekly completion grid, streaks (current + best), a Perfect Day badge, drag-to-reorder, six pre-loaded defaults, and a large tap-to-check-off panel front-and-center on the dashboard.
 - **Stats** — completion/focus-time/habit-rate/streak stat cards, a category donut, a weekly bar chart, and a CSS-grid monthly heatmap with month navigation.
-- **Settings** — account (username, change username, log out), profile, Pomodoro durations and timer sound, behavior toggles (confetti, sound, auto-start, first day of week), and data actions (JSON export, clear completed, reset habit streaks, reset everything).
+- **Accountability** — the counterweight to the XP and confetti. Every finished day is *sealed* into an immutable verdict (clean / short / lost / nothing due). If a day closed with promised work undone, the next time you open FlowState you get a full-screen closed-day screen naming every task you dropped, the XP forfeited, the streak it ended, and your own written reason quoted back at you — with no close button, only "carry it forward" or "let it go". Missed days are recorded permanently on the task as *debt*, which escalates in the UI the more times you break the same promise. Tone is user-controlled (Gentle / Honest / Brutal) and a day with nothing due is never held against you.
+- **Settings** — account (username, change username, log out), profile, Pomodoro durations and timer sound, behavior toggles (confetti, sound, auto-start, first day of week), accountability (tone, your "why", clearing queued reckonings), and data actions (JSON export, clear completed, reset habit streaks, reset everything).
 
 Responsive down to mobile widths: the sidebar collapses below `md` in favor of a bottom tab bar.
 
 ## Docs
 
-The full documentation site lives at `/docs` (linked from the landing page nav and footer) — a dedicated write-up for every tool: Tasks, Rewards, Focus, Habits, Stats, Gamification & XP, the Site Blocker, Settings & Data, Accounts & Sync, and Privacy & Self-Hosting. It's public regardless of login state, unlike the rest of the app.
+The full documentation site lives at `/docs` (linked from the landing page nav and footer) — a dedicated write-up for every tool: Tasks, Rewards, Focus, Habits, Stats, Gamification & XP, Accountability & the Reckoning, the Site Blocker, Settings & Data, Accounts & Sync, and Privacy & Self-Hosting. It's public regardless of login state, unlike the rest of the app.
 
 For developer and AI agent navigation through the codebase:
 - **[NAVIGATION.md](./NAVIGATION.md)** — Token-optimized repository map and quick feature-to-file directory.

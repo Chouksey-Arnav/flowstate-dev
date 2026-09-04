@@ -6,11 +6,13 @@ import { useHabitStore } from "@/store/habitStore";
 import { useFocusStore } from "@/store/focusStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useStreakStore } from "@/store/streakStore";
+import { useLedgerStore } from "@/store/ledgerStore";
 import { StatCard } from "@/components/stats/stat-card";
 import { CategoryDonut } from "@/components/stats/category-donut";
 import { WeeklyBarChart } from "@/components/stats/weekly-bar-chart";
 import { Heatmap } from "@/components/stats/heatmap";
 import { BadgeCase } from "@/components/stats/badge-case";
+import { ReckoningWall } from "@/components/stats/reckoning-wall";
 import { getCompletedTasks } from "@/lib/tasks";
 import { calculatePerfectDayStreak, getPerfectDayKeys } from "@/lib/streaks";
 import {
@@ -26,6 +28,7 @@ export default function StatsPage() {
   const sessions = useFocusStore((s) => s.sessions);
   const firstDayOfWeek = useSettingsStore((s) => s.firstDayOfWeek);
   const earnedBadgeIds = useStreakStore((s) => s.earnedBadgeIds);
+  const ledgerRecords = useLedgerStore((s) => s.records);
 
   const completedTasks = getCompletedTasks(tasks);
   const streak = calculatePerfectDayStreak(tasks);
@@ -58,6 +61,8 @@ export default function StatsPage() {
       <BadgeCase earnedBadgeIds={earnedBadgeIds} currentStreak={streak.current} />
 
       <Heatmap tasks={tasks} perfectDayKeys={perfectDayKeys} />
+
+      <ReckoningWall records={ledgerRecords} />
     </div>
   );
 }

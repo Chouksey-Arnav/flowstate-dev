@@ -12,6 +12,7 @@ import { useSettingsStore, getSettingsSnapshot } from "@/store/settingsStore";
 import { useReflectionStore } from "@/store/reflectionStore";
 import { useBlockerStore } from "@/store/blockerStore";
 import { useStreakStore } from "@/store/streakStore";
+import { useLedgerStore } from "@/store/ledgerStore";
 import { buildExportPayload, downloadJson } from "@/lib/export";
 
 type ActiveDialog = "clearCompleted" | "resetHabits" | "resetEverything" | null;
@@ -28,7 +29,8 @@ export function DataSection() {
       taskState.tasks,
       habitState.habits,
       focusState.sessions,
-      getSettingsSnapshot(settingsState)
+      getSettingsSnapshot(settingsState),
+      useLedgerStore.getState().records
     );
     downloadJson(payload, `flowstate-export-${new Date().toISOString().slice(0, 10)}.json`);
   };
@@ -95,6 +97,7 @@ export function DataSection() {
           useReflectionStore.getState().resetAll();
           useBlockerStore.getState().resetAll();
           useStreakStore.getState().resetAll();
+          useLedgerStore.getState().resetAll();
         }}
       />
     </Card>

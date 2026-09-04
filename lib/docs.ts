@@ -9,6 +9,7 @@ import {
   Flame,
   BarChart3,
   Trophy,
+  CalendarX2,
   SlidersHorizontal,
   ShieldCheck,
   Ban,
@@ -413,6 +414,65 @@ export const DOCS: DocPage[] = [
         heading: "Undoing XP",
         paragraphs: [
           "Unchecking a completed task or habit revokes the XP it originally earned — the ledger always reflects your current state, not a history of everything you ever clicked.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "accountability",
+    category: "growth",
+    icon: CalendarX2,
+    title: "Accountability & the Reckoning",
+    description: "What happens when a day closes with work you promised still undone.",
+    readTime: "4 min",
+    sections: [
+      {
+        heading: "Why this exists",
+        paragraphs: [
+          "Most productivity apps are built entirely out of rewards. You finish something and you get confetti, XP, a badge. Nothing at all happens when you don't — which quietly teaches you that the days you dropped never really counted.",
+          "FlowState closes that gap. Every day that passes gets judged and written down, and the days you let slide are put in front of you by name. Not to make you feel bad for its own sake, but because a cost you never see is a cost you never change.",
+        ],
+      },
+      {
+        heading: "How a day gets closed",
+        paragraphs: [
+          "When you next open FlowState after a day has ended, that day is sealed: FlowState counts what was due, what you finished, whether you kept the One Thing you locked in, and how much focused work you actually did. The verdict is written once and never edited.",
+        ],
+        bullets: [
+          "Clean — everything due that day was done.",
+          "Short — you finished some of it, not all.",
+          "Lost — nothing due that day got done.",
+          "Nothing due — never held against you. A day with no tasks is not a failure.",
+        ],
+        note: "A sealed day is final. Finishing something late never rewrites a day that already closed.",
+      },
+      {
+        heading: "The closed-day screen",
+        paragraphs: [
+          "If a day closed short, you see it before anything else: the date, every task you promised by name, the XP you left on the table, the streak it ended, and — if you've written one — your own reason for doing any of this, quoted back to you.",
+          "There's no close button. You either carry the work forward to today, or you say plainly that you're dropping it, which archives it. Both are real decisions; quietly dismissing it is not an option, because that's exactly the move the whole system exists to interrupt.",
+        ],
+      },
+      {
+        heading: "Debt",
+        paragraphs: [
+          "Every day a task was promised and skipped is recorded on that task, permanently. That count is its debt, and it shows up wherever the task appears — on the dashboard, on the task itself, and in the skip dialog, where you'll also be shown the excuse you gave last time.",
+          "Debt is different from the avoidance score. Avoidance measures how long something has been sitting. Debt measures how many times you personally said you'd do it and didn't — and past three or four, FlowState will tell you outright to either finish it or delete it.",
+        ],
+      },
+      {
+        heading: "Choosing the tone",
+        paragraphs: [
+          "Settings → Accountability sets how bluntly all of this is written: Gentle states the facts, Honest (the default) names the choice you made, Brutal doesn't soften anything. The setting only changes the wording — what gets recorded is identical either way, and you can hear each tone before you pick it.",
+          "Whichever you choose, the copy targets the decision, never you: nothing in FlowState will tell you what kind of person you are, and every confrontation ends with something you can do in the next minute.",
+        ],
+        note: "If the closed-day screens aren't helping you, set the tone to Gentle. A tool that makes you avoid opening it isn't doing its job.",
+      },
+      {
+        heading: "Your history",
+        paragraphs: [
+          "Stats → The days you let go lists every short day on record, with the tasks you missed, alongside a running total of days short, tasks missed, and XP forfeited. The dashboard shows the same thing as a two-week strip so a bad run is visible before you go looking for it.",
+          "All of it is included in your JSON export, and Settings → Accountability can clear any queued closed-day screens without erasing the history behind them.",
         ],
       },
     ],

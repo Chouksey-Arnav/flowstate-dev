@@ -3,6 +3,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { AlarmClock, Flame, TriangleAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getEndOfDayLine } from "@/lib/guilt";
+import type { GuiltIntensity } from "@/types";
 import type { GoalUrgency } from "@/lib/dailyGoal";
 
 interface StreakWarningBannerProps {
@@ -10,21 +12,13 @@ interface StreakWarningBannerProps {
   tasksRemaining: number;
   hoursRemaining: number;
   streak: number;
+  intensity: GuiltIntensity;
 }
 
-const COPY: Partial<Record<GoalUrgency, { title: (t: number) => string; icon: typeof AlarmClock }>> = {
-  nudge: {
-    title: (t) => `${t} task${t === 1 ? "" : "s"} left for a perfect day.`,
-    icon: AlarmClock,
-  },
-  warning: {
-    title: (t) => `Still ${t} task${t === 1 ? "" : "s"} short of a perfect day — the day's running out.`,
-    icon: TriangleAlert,
-  },
-  critical: {
-    title: (t) => `${t} task${t === 1 ? "" : "s"} left. Do it now or the streak ends today.`,
-    icon: Flame,
-  },
+const ICONS: Partial<Record<GoalUrgency, typeof AlarmClock>> = {
+  nudge: AlarmClock,
+  warning: TriangleAlert,
+  critical: Flame,
 };
 
 const TIER_CLASSES: Record<string, string> = {
@@ -33,13 +27,27 @@ const TIER_CLASSES: Record<string, string> = {
   critical: "border-flow-red/40 bg-flow-red/[0.09] text-foreground",
 };
 
-export function StreakWarningBanner({ tier, tasksRemaining, hoursRemaining, streak }: StreakWarningBannerProps) {
-  const copy = COPY[tier];
-  const show = !!copy && streak > 0;
+/**
+ * The clock closing in on unfinished work.
+ *
+ * This used to require an active streak, which meant it went quiet for the one
+ * person who needs it most — someone who already broke their streak and is
+ * mid-slide. The streak is now a detail in the subtext, not the precondition:
+ * what triggers the warning is unfinished work and a shrinking day.
+ */
+export function StreakWarningBanner({
+  tier,
+  tasksRemaining,
+  hoursRemaining,
+  streak,
+  intensity,
+}: StreakWarningBannerProps) {
+  const Icon = ICONS[tier];
+  const show = !!Icon && tasksRemaining > 0;
 
   return (
     <AnimatePresence initial={false}>
-      {show && copy && (
+      {show && Icon && (
         <motion.div
           initial={{ opacity: 0, height: 0, marginBottom: 0 }}
           animate={{ opacity: 1, height: "auto", marginBottom: 0 }}
@@ -53,11 +61,15 @@ export function StreakWarningBanner({ tier, tasksRemaining, hoursRemaining, stre
               tier === "critical" && "animate-pulse-slow"
             )}
           >
-            <copy.icon className={cn("h-4 w-4 shrink-0", tier === "critical" && "text-flow-red")} />
+            <Icon className={cn("h-4 w-4 shrink-0", tier === "critical" && "text-flow-red")} />
             <div className="min-w-0 flex-1">
-              <p className="font-medium leading-tight">{copy.title(tasksRemaining)}</p>
+              <p className="font-medium leading-tight">
+                {getEndOfDayLine(tasksRemaining, hoursRemaining, intensity)}
+              </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {streak}-day streak on the line · ~{hoursRemaining}h left today
+                {streak > 0
+                  ? `${streak}-day streak on the line · ~${hoursRemaining}h left today`
+                  : `~${hoursRemaining}h left today · a clean day today starts a new streak`}
               </p>
             </div>
           </div>

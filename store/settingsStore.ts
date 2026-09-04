@@ -16,6 +16,8 @@ const DEFAULT_SETTINGS: Settings = {
   timerSoundType: "bell",
   autoStartNext: false,
   firstDayOfWeek: "monday",
+  guiltIntensity: "honest",
+  why: "",
 };
 
 interface SettingsState extends Settings {
@@ -24,6 +26,8 @@ interface SettingsState extends Settings {
   updateSettings: (updates: Partial<Settings>) => void;
   setCommitment: (taskId: string, date: string) => void;
   clearCommitment: () => void;
+  /** Stores the user's own stated reason, timestamped, so it can be quoted back verbatim. */
+  setWhy: (why: string) => void;
   resetAll: () => void;
 }
 
@@ -36,6 +40,7 @@ export const useSettingsStore = create<SettingsState>()(
       updateSettings: (updates) => set((state) => ({ ...state, ...updates })),
       setCommitment: (taskId, date) => set({ commitTaskId: taskId, commitDate: date }),
       clearCommitment: () => set({ commitTaskId: undefined, commitDate: undefined }),
+      setWhy: (why) => set({ why: why.trim(), whySetAt: new Date().toISOString() }),
       resetAll: () => set({ ...DEFAULT_SETTINGS }),
     }),
     {
@@ -49,6 +54,6 @@ export const useSettingsStore = create<SettingsState>()(
 );
 
 export function getSettingsSnapshot(state: SettingsState): Settings {
-  const { name, dailyGoal, pomodoroWork, pomodoroBreak, pomodoroLongBreak, soundEnabled, confettiEnabled, desktopNotificationsEnabled, ambientSound, timerSoundType, autoStartNext, firstDayOfWeek } = state;
-  return { name, dailyGoal, pomodoroWork, pomodoroBreak, pomodoroLongBreak, soundEnabled, confettiEnabled, desktopNotificationsEnabled, ambientSound, timerSoundType, autoStartNext, firstDayOfWeek };
+  const { name, dailyGoal, pomodoroWork, pomodoroBreak, pomodoroLongBreak, soundEnabled, confettiEnabled, desktopNotificationsEnabled, ambientSound, timerSoundType, autoStartNext, firstDayOfWeek, guiltIntensity, why, whySetAt } = state;
+  return { name, dailyGoal, pomodoroWork, pomodoroBreak, pomodoroLongBreak, soundEnabled, confettiEnabled, desktopNotificationsEnabled, ambientSound, timerSoundType, autoStartNext, firstDayOfWeek, guiltIntensity, why, whySetAt };
 }

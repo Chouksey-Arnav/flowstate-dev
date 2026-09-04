@@ -75,6 +75,9 @@ export function CommitmentCard({
         <p className="relative mt-1 text-sm text-muted-foreground">
           You committed to this today. Nothing else matters until it&apos;s done.
         </p>
+        <p className="relative mt-1.5 text-xs font-medium text-flow-red/90">
+          If this isn&apos;t done by midnight, it goes on your record by name.
+        </p>
         <div className="relative mt-3 flex flex-wrap items-center gap-1.5">
           <PriorityBadge priority={committedTask.priority} />
           <DifficultyBadge difficulty={committedTask.difficulty} />
@@ -106,6 +109,10 @@ export function CommitmentCard({
         <p className="text-sm text-muted-foreground">
           Pick the one task you will not let slide today. Lock it in — it&apos;s the first thing
           you&apos;ll see until it&apos;s done.
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Locking in is a real promise: if the day closes without it, FlowState will show you
+          exactly what you chose and didn&apos;t do.
         </p>
         {activeTasks.length === 0 ? (
           <p className="text-sm text-muted-foreground">Add a task first, then commit to it.</p>

@@ -130,3 +130,20 @@ export function createAmbientLoop(sound: AmbientSound, volume = 0.3): AmbientHan
     },
   };
 }
+
+/**
+ * The reckoning tone: a slow, low, descending minor figure. Deliberately the
+ * emotional inverse of `playCompletionChime` — that one rises and resolves,
+ * this one sinks and doesn't. It plays under the closed-day screen, quiet
+ * enough to be felt more than heard.
+ */
+export function playReckoningTone(): void {
+  const audioCtx = getAudioContext();
+  const now = audioCtx.currentTime;
+  const notes = [220, 174.61, 146.83]; // A3, F3, D3 — a falling minor
+  notes.forEach((freq, i) => {
+    playTone(audioCtx, freq, now + i * 0.42, 1.6, "sine", 0.1);
+  });
+  // A sub-octave underneath gives it weight in the chest rather than the ear.
+  playTone(audioCtx, 73.42, now, 2.6, "sine", 0.06);
+}
