@@ -5,6 +5,7 @@ import { useHabitStore } from "@/store/habitStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useReflectionStore } from "@/store/reflectionStore";
 import { useStreakStore } from "@/store/streakStore";
+import { useLedgerStore } from "@/store/ledgerStore";
 import { Greeting } from "@/components/dashboard/greeting";
 import { DateCounter } from "@/components/dashboard/date-counter";
 import { DailyReminderCard } from "@/components/dashboard/daily-reminder-card";
@@ -18,6 +19,9 @@ import { PomodoroMiniWidget } from "@/components/dashboard/pomodoro-mini-widget"
 import { MotivationalQuote } from "@/components/dashboard/motivational-quote";
 import { CommitmentCard } from "@/components/dashboard/commitment-card";
 import { AvoidedTasksCard } from "@/components/dashboard/avoided-tasks-card";
+import { DebtCard } from "@/components/dashboard/debt-card";
+import { WhyCard } from "@/components/dashboard/why-card";
+import { DayVerdictStrip } from "@/components/reckoning/day-verdict-strip";
 import { ReflectionInsightCard } from "@/components/dashboard/reflection-insight-card";
 import { TodayProgressCard } from "@/components/dashboard/today-progress-card";
 import { NextBadgeStrip } from "@/components/dashboard/next-badge-strip";
@@ -26,6 +30,7 @@ import { WeeklyChartMini } from "@/components/dashboard/weekly-chart-mini";
 import { QuickAddButton } from "@/components/dashboard/quick-add-button";
 import { SectionHeading } from "@/components/dashboard/section-heading";
 import { getTopTasks, getActiveTasks, getAvoidedTasks, isTaskCompletedOn } from "@/lib/tasks";
+import { getDebtTasks } from "@/lib/reckoning";
 import { calculatePerfectDayStreak, getTasksDueOn } from "@/lib/streaks";
 import { getGoalStatus } from "@/lib/dailyGoal";
 import { getWeeklySeries } from "@/lib/stats";
@@ -48,6 +53,8 @@ export default function DashboardPage() {
   const commitDate = useSettingsStore((s) => s.commitDate);
   const setCommitment = useSettingsStore((s) => s.setCommitment);
   const earnedBadgeIds = useStreakStore((s) => s.earnedBadgeIds);
+  const ledgerRecords = useLedgerStore((s) => s.records);
+  const guiltIntensity = useSettingsStore((s) => s.guiltIntensity);
 
   const now = useNowTick();
 
@@ -58,6 +65,11 @@ export default function DashboardPage() {
   const weeklySeries = getWeeklySeries(tasks, firstDayOfWeek);
 
   const todayKey = toDateKey();
+  const debtTasks = getDebtTasks(tasks, todayKey);
+  const debtIds = new Set(debtTasks.map((t) => t.id));
+  // Debt outranks avoidance: a task you've actually broken a promise on is
+  // called out by the debt card, so it never doubles up here.
+  const avoidedOnly = avoidedTasks.filter((t) => !debtIds.has(t.id));
   const dueToday = getTasksDueOn(tasks, todayKey);
   const completedToday = dueToday.filter((t) => isTaskCompletedOn(t, todayKey)).length;
   const totalToday = dueToday.length;
@@ -69,6 +81,7 @@ export default function DashboardPage() {
 
   const streakAtRisk = streak.current > 0 && (goalStatus.tier === "warning" || goalStatus.tier === "critical");
   const quote = getDashboardQuote({ hasAvoidedTask: avoidedTasks.length > 0, streakAtRisk });
+  const hasDebt = debtTasks.length > 0;
 
   function handleCompleteAnyTask(id: string) {
     const task = tasks.find((t) => t.id === id);
@@ -86,21 +99,26 @@ export default function DashboardPage() {
         <QuickAddButton />
       </div>
 
+      <WhyCard intensity={guiltIntensity} />
+
       <LevelHeroCard />
 
       <DailyReminderCard totalToday={totalToday} completedToday={completedToday} />
 
-      <MotivationalQuote quote={quote} intense={avoidedTasks.length > 0 || streakAtRisk} />
+      <MotivationalQuote quote={quote} intense={!hasDebt && (avoidedTasks.length > 0 || streakAtRisk)} />
 
       <StreakWarningBanner
         tier={goalStatus.tier}
         tasksRemaining={goalStatus.tasksRemaining}
         hoursRemaining={goalStatus.hoursRemaining}
         streak={streak.current}
+        intensity={guiltIntensity}
       />
 
       <div className="space-y-4">
         <SectionHeading title="Today" subtitle="What actually needs to happen" />
+
+        <DebtCard tasks={debtTasks} intensity={guiltIntensity} />
 
         <CommitmentCard
           activeTasks={activeTasks}
@@ -113,7 +131,7 @@ export default function DashboardPage() {
 
         <TopTasksCard tasks={topTasks} onComplete={handleCompleteAnyTask} />
 
-        <AvoidedTasksCard tasks={avoidedTasks} />
+        <AvoidedTasksCard tasks={avoidedOnly} />
       </div>
 
       <div className="space-y-4">
@@ -136,6 +154,8 @@ export default function DashboardPage() {
             tier={goalStatus.tier}
           />
         </div>
+
+        <DayVerdictStrip records={ledgerRecords} intensity={guiltIntensity} />
 
         <NextBadgeStrip currentStreak={streak.current} earnedBadgeIds={earnedBadgeIds} />
 

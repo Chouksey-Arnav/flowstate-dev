@@ -87,6 +87,17 @@ const config: Config = {
           "60%": { transform: "scale(1.05)", opacity: "1" },
           "100%": { transform: "scale(1)", opacity: "1" },
         },
+        // Deliberately the opposite of "level-up-pop": no overshoot, no
+        // bounce. The closed-day screen settles into place rather than
+        // arriving — it should feel like something landing on you.
+        "reckoning-settle": {
+          "0%": { transform: "translateY(-6px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        "debt-throb": {
+          "0%, 100%": { opacity: "0.35" },
+          "50%": { opacity: "0.75" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -94,6 +105,8 @@ const config: Config = {
         "flame-flicker": "flame-flicker 2.2s ease-in-out infinite",
         "pulse-slow": "pulse-slow 2.4s ease-in-out infinite",
         "level-up-pop": "level-up-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "reckoning-settle": "reckoning-settle 0.9s cubic-bezier(0.16, 1, 0.3, 1) both",
+        "debt-throb": "debt-throb 3.4s ease-in-out infinite",
       },
     },
   },

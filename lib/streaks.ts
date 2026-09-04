@@ -16,7 +16,9 @@ export function getTasksDueOn(tasks: Task[], dateKey: string): Task[] {
   return tasks.filter((t) => {
     if (t.status === "archived") return false;
     if (t.schedule) return isScheduleActiveOn(t.schedule, dateKey);
-    return t.dueDate === dateKey;
+    // A missed day is a day this task *was* due, permanently. Carrying a task
+    // forward moves `dueDate` but never erases the day it was promised for.
+    return t.dueDate === dateKey || (t.missedDays ?? []).includes(dateKey);
   });
 }
 
@@ -36,8 +38,13 @@ export function getPerfectDayKeys(tasks: Task[]): Set<string> {
       for (let offset = 0; offset < Math.max(1, t.schedule.repeatDays); offset++) {
         pushToMap(dueByDay, addDaysToKey(t.schedule.startDate, offset), t);
       }
-    } else if (t.dueDate) {
-      pushToMap(dueByDay, t.dueDate, t);
+    } else {
+      if (t.dueDate) pushToMap(dueByDay, t.dueDate, t);
+      // Days this task was promised for and missed still count against those
+      // days, even after it's been carried forward to a new due date.
+      for (const missed of t.missedDays ?? []) {
+        if (missed !== t.dueDate) pushToMap(dueByDay, missed, t);
+      }
     }
   }
 

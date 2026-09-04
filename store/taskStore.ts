@@ -13,7 +13,7 @@ interface TaskState {
   tasks: Task[];
   hasHydrated: boolean;
   setHasHydrated: (value: boolean) => void;
-  addTask: (input: Omit<Task, "id" | "createdAt" | "status" | "subtasks" | "tags" | "order" | "timesSkipped" | "difficulty" | "xpOverride" | "completions"> & {
+  addTask: (input: Omit<Task, "id" | "createdAt" | "status" | "subtasks" | "tags" | "order" | "timesSkipped" | "difficulty" | "xpOverride" | "completions" | "missedDays" | "originalDueDate"> & {
     difficulty?: Difficulty;
     subtasks?: SubTask[];
     tags?: string[];
@@ -33,6 +33,16 @@ interface TaskState {
   reorderAll: (tasks: Task[]) => void;
   clearCompleted: () => void;
   skipTask: (id: string) => void;
+  /**
+   * Writes the permanent record of a broken promise. Append-only and
+   * idempotent — a day can never be marked missed twice, and a miss can
+   * never be erased by later edits.
+   */
+  recordMissedDay: (taskIds: string[], dateKey: string) => void;
+  /** Re-dues missed tasks for today. The miss stays on the record; only the deadline moves. */
+  carryForward: (taskIds: string[], dateKey?: string) => void;
+  /** Explicitly gives up on tasks instead of pretending they'll happen — archives them. */
+  letGo: (taskIds: string[]) => void;
   resetAll: () => void;
 }
 
@@ -63,6 +73,8 @@ export const useTaskStore = create<TaskState>()(
           reward: input.reward,
           schedule: input.schedule,
           completions: [],
+          missedDays: [],
+          originalDueDate: input.dueDate,
         };
         set((state) => ({ tasks: [...state.tasks, task] }));
         return task;
@@ -223,12 +235,50 @@ export const useTaskStore = create<TaskState>()(
           ),
         })),
 
+      recordMissedDay: (taskIds, dateKey) => {
+        const ids = new Set(taskIds);
+        set((state) => ({
+          tasks: state.tasks.map((t) => {
+            if (!ids.has(t.id)) return t;
+            const missedDays = t.missedDays ?? [];
+            if (missedDays.includes(dateKey)) return t;
+            return {
+              ...t,
+              missedDays: [...missedDays, dateKey].sort(),
+              originalDueDate: t.originalDueDate ?? t.dueDate ?? dateKey,
+            };
+          }),
+        }));
+      },
+
+      carryForward: (taskIds, dateKey = toDateKey()) => {
+        const ids = new Set(taskIds);
+        set((state) => ({
+          tasks: state.tasks.map((t) =>
+            // Scheduled tasks recur on their own — moving their due date would
+            // corrupt the recurrence window, so they're left alone.
+            ids.has(t.id) && t.status === "active" && !t.schedule
+              ? { ...t, dueDate: dateKey, originalDueDate: t.originalDueDate ?? t.dueDate }
+              : t
+          ),
+        }));
+      },
+
+      letGo: (taskIds) => {
+        const ids = new Set(taskIds);
+        set((state) => ({
+          tasks: state.tasks.map((t) =>
+            ids.has(t.id) && t.status === "active" ? { ...t, status: "archived" } : t
+          ),
+        }));
+      },
+
       resetAll: () => set({ tasks: [] }),
     }),
     {
       name: "flowstate-tasks",
       storage: createJSONStorage(() => supabaseKvStorage),
-      version: 2,
+      version: 3,
       migrate: (persistedState) => {
         const state = persistedState as { tasks?: Partial<Task>[] };
         const tasks: Task[] = (state.tasks ?? []).map((t) => ({
@@ -236,6 +286,10 @@ export const useTaskStore = create<TaskState>()(
           timesSkipped: 0,
           completions: [],
           ...t,
+          // Existing tasks start with a clean record — the accountability
+          // ledger only ever judges days it actually watched.
+          missedDays: t.missedDays ?? [],
+          originalDueDate: t.originalDueDate ?? t.dueDate,
         })) as Task[];
         return { ...state, tasks };
       },

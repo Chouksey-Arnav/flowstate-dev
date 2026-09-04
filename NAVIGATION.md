@@ -16,6 +16,7 @@ When implementing or modifying a feature, consult this matrix to identify exact 
 | **Stats & Analytics** | `app/(app)/stats/page.tsx` | `components/stats/*` | Reads tasks/focus/habits stores | `lib/stats.ts`, `lib/badges.ts` |
 | **Gamification & XP** | Topbar / Badges / Modals | `components/gamification/*` | `xpStore.ts`, `xpToastStore.ts` | `lib/xp.ts`, `lib/badges.ts`, `lib/confetti.ts` |
 | **Dashboard** | `app/(app)/dashboard/page.tsx` | `components/dashboard/*` | Orchestrates all domain stores | `lib/dailyGoal.ts`, `lib/quotes.ts` |
+| **Accountability / Reckoning** | Mounted in `app/(app)/layout.tsx` | `components/reckoning/*`, `dashboard/debt-card.tsx`, `dashboard/why-card.tsx`, `stats/reckoning-wall.tsx`, `tasks/debt-badge.tsx` | `ledgerStore.ts` | `lib/reckoning.ts` (sealing, debt), `lib/guilt.ts` (tone/copy) |
 | **Settings & Sync** | `app/(app)/settings/page.tsx` | `components/settings/*` | `settingsStore.ts`, `blockerStore.ts` | `lib/export.ts`, `lib/blockerScript.ts` |
 | **Auth & Accounts** | `app/(auth)/login/`, `signup/` | `components/auth/*` | Auth session (`lib/supabase/`) | `lib/auth/actions.ts`, `supabase/functions/*` |
 | **Landing Page** | `app/page.tsx` | `components/marketing/*` | N/A | `lib/site.ts`, `lib/desktop-install.ts` |
@@ -52,6 +53,7 @@ When implementing or modifying a feature, consult this matrix to identify exact 
 │   ├── stats/                # Heatmap, WeeklyBarChart, CategoryDonut, BadgeCase
 │   ├── settings/             # Sections for Account, Behavior, Pomodoro, Data, Blocker
 │   ├── gamification/         # XPBar, LevelUpModal, StreakMilestoneModal, XPToastStack
+│   ├── reckoning/            # ReckoningGate (seals days), ReckoningModal, DayVerdictStrip
 │   ├── marketing/            # Landing page sections (Hero, Features, FAQ, SiteNav, Footer)
 │   ├── docs/                 # Docs sidebar, topbar, and content renderer
 │   └── auth/                 # UsernameField and auth forms
@@ -65,7 +67,8 @@ When implementing or modifying a feature, consult this matrix to identify exact 
 │   ├── xpToastStore.ts       # Non-blocking floating XP gains toasts
 │   ├── settingsStore.ts      # User preferences (durations, auto-start, sounds, theme)
 │   ├── reflectionStore.ts    # Daily reflection notes & insights
-│   └── blockerStore.ts       # Distraction site blocker rules & script generation
+│   ├── blockerStore.ts       # Distraction site blocker rules & script generation
+│   └── ledgerStore.ts        # Immutable sealed-day verdicts — the accountability record
 ├── lib/                      # Pure helper functions, domain logic & API utilities
 │   ├── audio.ts              # Web Audio API synthesizer (timer chimes, ambient noise)
 │   ├── auth/actions.ts       # Login/signup/change-username edge function callers
@@ -75,6 +78,8 @@ When implementing or modifying a feature, consult this matrix to identify exact 
 │   ├── tasks.ts & overdue.ts # Task filtering, sorting, overdue helpers
 │   ├── habits.ts & streaks.ts# Habit streaks, perfect days, frequency calculations
 │   ├── stats.ts              # Aggregations for charts & heatmaps
+│   ├── reckoning.ts          # Day sealing, verdicts, task debt, year framing
+│   ├── guilt.ts              # Accountability copy engine (gentle/honest/brutal tones)
 │   ├── docs.ts               # Markdown docs loader & slug resolver
 │   └── site.ts               # Metadata & desktop release download URLs
 ├── types/                    # TypeScript interfaces & domain types
@@ -106,7 +111,14 @@ When implementing or modifying a feature, consult this matrix to identify exact 
 * Zero external audio files or third-party embeds (e.g. YouTube audio) are used for ambient audio or timer alarms.
 * All audio (timer start/end chimes, ambient lofi, rain, white/brown noise) is dynamically synthesized using the browser's **Web Audio API**.
 
-### 3. Auth Model (`lib/auth/actions.ts` & `supabase/functions/`)
+### 3. Accountability Ledger (`lib/reckoning.ts` + `store/ledgerStore.ts`)
+* `ReckoningGate` (mounted in the app layout) seals every fully-passed day into an immutable `DayRecord`, once per session per date.
+* Sealing is a **pure** function of the world as it was, so it can be replayed without changing what a past day means. Records are append-only — `sealDays` never overwrites an existing date.
+* A missed day is written onto the task itself (`Task.missedDays`). `getTasksDueOn` / `getPerfectDayKeys` read that list, and that is what keeps history immutable: carrying a task forward moves its `dueDate` but can never retroactively turn a failed day into a Perfect Day.
+* A day with nothing due is always `empty` and never triggers a confrontation. Precision here is what stops the system becoming noise the user learns to click through.
+* All user-facing wording lives in `lib/guilt.ts`, tiered by the `guiltIntensity` setting. Copy targets the choice, never the person, and always ends with an action.
+
+### 4. Auth Model (`lib/auth/actions.ts` & `supabase/functions/`)
 * Supabase Auth is mapped to usernames by generating internal `<uuid>@flowstate.internal` emails.
 * Account operations (signup, login, username changes) are proxied through Supabase Edge Functions (`flowstate-signup`, `flowstate-login`, `flowstate-change-username`) to keep the service-role key secure.
 

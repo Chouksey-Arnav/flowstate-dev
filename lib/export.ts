@@ -1,27 +1,31 @@
-import type { Task, Habit, FocusSession, Settings } from "@/types";
+import type { Task, Habit, FocusSession, Settings, DayRecord } from "@/types";
 
 export interface ExportPayload {
   exportedAt: string;
-  version: 1;
+  version: 2;
   tasks: Task[];
   habits: Habit[];
   focusSessions: FocusSession[];
   settings: Settings;
+  /** Sealed day verdicts — the accountability history, exported alongside the wins. */
+  ledger: DayRecord[];
 }
 
 export function buildExportPayload(
   tasks: Task[],
   habits: Habit[],
   focusSessions: FocusSession[],
-  settings: Settings
+  settings: Settings,
+  ledger: DayRecord[] = []
 ): ExportPayload {
   return {
     exportedAt: new Date().toISOString(),
-    version: 1,
+    version: 2,
     tasks,
     habits,
     focusSessions,
     settings,
+    ledger,
   };
 }
 

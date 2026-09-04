@@ -220,7 +220,7 @@ export default function TasksPage() {
 
       <SkipReasonDialog
         open={!!skipReasonTaskId}
-        taskTitle={tasks.find((t) => t.id === skipReasonTaskId)?.title ?? ""}
+        task={tasks.find((t) => t.id === skipReasonTaskId)}
         onOpenChange={(open) => !open && setSkipReasonTaskId(undefined)}
         onSelect={(reason) =>
           skipReasonTaskId && addReflection({ context: "skip", reason, taskId: skipReasonTaskId })

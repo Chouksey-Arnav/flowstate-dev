@@ -16,11 +16,13 @@ import { DifficultyBadge } from "./difficulty-badge";
 import { CategoryBadge } from "./category-badge";
 import { OverdueBadge } from "./overdue-badge";
 import { AvoidedBadge } from "./avoided-badge";
+import { DebtBadge } from "./debt-badge";
 import { SubtaskList } from "./subtask-list";
 import { cn } from "@/lib/utils";
 import { formatDisplayDate } from "@/lib/dates";
 import { isOverdue } from "@/lib/overdue";
 import { getAvoidanceScore, daysSinceCreated, AVOIDANCE_THRESHOLD, isTaskCompletedOn, getScheduleDayLabel } from "@/lib/tasks";
+import { getDebtWeight } from "@/lib/reckoning";
 import { xpForTask } from "@/lib/xp";
 import { toDateKey } from "@/lib/dates";
 import { usePomodoroStore } from "@/store/pomodoroStore";
@@ -68,6 +70,7 @@ export function TaskItem({
   const setCommitment = useSettingsStore((s) => s.setCommitment);
   const commitTaskId = useSettingsStore((s) => s.commitTaskId);
   const commitDate = useSettingsStore((s) => s.commitDate);
+  const guiltIntensity = useSettingsStore((s) => s.guiltIntensity);
   const today = toDateKey();
   const archived = task.status === "archived";
   const completed = task.schedule ? isTaskCompletedOn(task, today) : task.status === "completed";
@@ -87,6 +90,7 @@ export function TaskItem({
   const quickWin = !completed && !!task.estimatedMinutes && task.estimatedMinutes <= 15;
   const avoided = !completed && !archived && getAvoidanceScore(task) >= AVOIDANCE_THRESHOLD;
   const taskXp = xpForTask(task);
+  const debtWeight = completed ? "none" : getDebtWeight(task);
   const isTodaysFocus = commitTaskId === task.id && commitDate === toDateKey();
 
   const PRIORITY_ACCENT: Record<string, string> = {
@@ -111,6 +115,13 @@ export function TaskItem({
         "group rounded-xl border border-l-[3px] border-border/60 bg-card p-3.5 shadow-card transition-all hover:border-border hover:shadow-card-hover",
         PRIORITY_ACCENT[task.priority],
         overdue && !completed && "bg-flow-red/[0.03]",
+        // A task you've broken promises on gets visually heavier, so a long-dodged
+        // item can't hide among fresh ones in a long list.
+        // A thicker rail, not just a red one — HIGH-priority tasks are already
+        // red on the left, so colour alone wouldn't distinguish debt from urgency.
+        debtWeight === "heavy" && "border-l-[5px] border-l-flow-red bg-flow-red/[0.04]",
+        debtWeight === "crushing" &&
+          "border-l-[7px] border-l-flow-red border-flow-red/40 bg-flow-red/[0.07]",
         completed && "border-l-flow-green bg-flow-green/5 opacity-60 hover:shadow-card"
       )}
     >
@@ -147,6 +158,7 @@ export function TaskItem({
             <DifficultyBadge difficulty={task.difficulty} />
             {overdue && <OverdueBadge />}
             {avoided && <AvoidedBadge days={daysSinceCreated(task)} />}
+            {!completed && <DebtBadge task={task} intensity={guiltIntensity} />}
             {isTodaysFocus && !completed && (
               <span className="flex items-center gap-1 rounded-full border border-flow-red/30 bg-flow-red/10 px-2 py-0.5 text-xs font-medium text-flow-red">
                 <Target className="h-3 w-3" /> Today&apos;s focus
